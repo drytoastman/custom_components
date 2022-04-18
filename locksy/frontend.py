@@ -15,10 +15,8 @@ log = logging.getLogger(__name__)
 
 @websocket_api.decorators.async_response
 async def websocket_updates(hass: HomeAssistant, connection: ActiveConnection, msg: dict[str, Any]):
-    log.error("websocketupdatest called")
     @callback
     def updated():
-        log.error("websocketupdatest sending N+1")
         locksy:Locksy = hass.data[const.DOMAIN]
         connection.send_message({ "id": msg["id"], "type": "event", "event": locksy.data.getAll() })
 

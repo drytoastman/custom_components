@@ -1,10 +1,5 @@
 """Store constants."""
 import datetime
-import voluptuous as vol
-
-from homeassistant.helpers import config_validation as cv
-
-from homeassistant.const import (ATTR_ENTITY_ID)
 
 VERSION = "0.0.1"
 NAME = "Locksy"
@@ -29,9 +24,3 @@ SENSOR_ARM_TIME = datetime.timedelta(seconds=5)
 #DATA_REGISTRY = f"{DOMAIN}_storage"
 STORAGE_KEY = f"{DOMAIN}.storage"
 STORAGE_VERSION = 1
-
-SERVICE_SET_CODES = "set_codes"
-SERVICE_SET_CODES_SCHEMA = vol.Schema({cv.string: cv.string})
-
-SERVICE_SET_LOCATIONS = "set_locations"
-SERVICE_SET_LOCATIONS_SCHEMA = vol.Schema({cv.string: vol.All(cv.ensure_list, [cv.string])})

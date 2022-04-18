@@ -1,12 +1,14 @@
 """The Locksy Integration."""
 import asyncio
 import logging
+import voluptuous as vol
 
 from zwave_js_server.client import Client as ZWaveClient
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import (callback, HomeAssistant)
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.storage import Store
@@ -24,18 +26,17 @@ def register_services(hass: HomeAssistant):
     async def set_codes(call):
         locksy:Locksy = hass.data[const.DOMAIN]
         await locksy.setCodes(call.data)
+    async_register_admin_service(hass, const.DOMAIN, "set_codes", set_codes, schema=vol.Schema({cv.string: cv.string}))
 
-    async_register_admin_service(
-        hass, const.DOMAIN, const.SERVICE_SET_CODES, set_codes, schema=const.SERVICE_SET_CODES_SCHEMA
-    )
-
-    async def set_locations(call):
+    async def add_name_to_lock(call):
         locksy:Locksy = hass.data[const.DOMAIN]
-        await locksy.setLocations(call.data)
+        await locksy.addNameToLock(call.data['name'], call.data['lockid'])
+    async_register_admin_service(hass, const.DOMAIN, "add_name_to_lock", add_name_to_lock, schema=vol.Schema({'name': str, 'lockid': int}))
 
-    async_register_admin_service(
-        hass, const.DOMAIN, const.SERVICE_SET_LOCATIONS, set_locations, schema=const.SERVICE_SET_LOCATIONS_SCHEMA
-    )
+    async def remove_name_from_lock(call):
+        locksy:Locksy = hass.data[const.DOMAIN]
+        await locksy.removeNameFromLock(call.data['name'], call.data['lockid'])
+    async_register_admin_service(hass, const.DOMAIN, "remove_name_from_lock", remove_name_from_lock, schema=vol.Schema({'name': str, 'lockid': int}))
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):

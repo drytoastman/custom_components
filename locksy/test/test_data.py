@@ -40,7 +40,8 @@ async def test_basic():
     await locksy.setCodes({
         "main": "1234"
     })
-    await locksy.setLocations({"6": ["main"], "12": ["main"]})
+    await locksy.addNameToLock('main', 6)
+    await locksy.addNameToLock('main', 12)
 
     await locksy.setCodes({
         "main": "1234",
@@ -55,9 +56,9 @@ async def test_basic():
         await locksy.setCodes({"external": "1234"})
     assert exc_info.value.args[0] == "Cannot use 'external' for code name"
 
-    await locksy.setLocations({"6": [], "12": []})
+    await locksy.removeNameFromLock('main', 6)
+    await locksy.removeNameFromLock('main', 12)
 
     with pytest.raises(HomeAssistantError) as exc_info:
-        await locksy.setLocations({"6": ['missing'], "12": []})
-    log.debug(exc_info.value)
+        await locksy.addNameToLock('missing', 6)
     assert exc_info.value.args[0] == "missing is not a valid code name"
