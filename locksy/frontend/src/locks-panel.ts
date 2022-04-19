@@ -1,10 +1,12 @@
-import { LitElement, html, CSSResultGroup, css } from 'lit';
-import { property, customElement } from 'lit/decorators.js';
+// import '@material/mwc-button';
+
+import { CSSResultGroup, LitElement, css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
 import { HomeAssistant } from 'custom-card-helpers';
 
 export interface LocksyData {
     codes: { [name: string]: string }
-    locations: { [lockid: string]: [string] }
     slots: { [lockid: string]: { [slotid: string]: string }}
 }
 
@@ -15,7 +17,6 @@ export class MyLocksPanel extends LitElement {
 
     data: LocksyData = {
         codes: {},
-        locations: {},
         slots: {}
     };
 
@@ -60,13 +61,18 @@ export class MyLocksPanel extends LitElement {
                         <div class='slottable'>
                         ${Object.keys(this.data.slots[lockid]).map(slotid => html`
                             <div class='slot'>${slotid}</div>
-                            <div class='aname'>${this.data.slots[lockid][slotid]}</div>
+                            <div class='aname'>
+                                ${this.data.slots[lockid][slotid]}
+                                ${this.data.slots[lockid][slotid] != 'external' ? html`
+                                <mwc-button outlined dense>
+                                    <ha-icon icon="hass:trash-can-outline"></ha-icon>
+                                </mwc-button>` : ''}
+                            </div>
                         `)}
                         </div>
                     `)}
                 </div>
             </ha-card>
-            ${JSON.stringify(this.data)}
           </div>
         `;
     }
