@@ -7,9 +7,9 @@ import commonjs from '@rollup/plugin-commonjs';
 
 const plugins = [
   nodeResolve(),
-  commonjs({
+  /* commonjs({
     include: 'node_modules/**'
-  }),
+  }), */
   typescript(),
   json(),
   babel({
@@ -24,8 +24,8 @@ export default [
     input: 'src/locks-panel.ts',
     output: {
       dir: 'dist',
-      format: 'iife',
-      sourcemap: false
+      //format: 'iife',
+      //sourcemap: false
     },
     plugins: [...plugins],
     context: 'window'

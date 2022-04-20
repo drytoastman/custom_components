@@ -7,10 +7,10 @@
   "dependencies": [
     "http",
     "panel_custom",
-    "websocket_api"
+    "websocket_api",
+    "zwave_js"
   ],
   "after_dependencies": [
-    "notify"
   ],
   "codeowners": [
     "@drytoastman"

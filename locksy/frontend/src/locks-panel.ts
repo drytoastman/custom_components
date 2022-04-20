@@ -3,26 +3,31 @@
 import { CSSResultGroup, LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { HomeAssistant } from 'custom-card-helpers';
+import { fireEvent, HomeAssistant } from 'custom-card-helpers';
 
 export interface LocksyData {
     codes: { [name: string]: string }
     slots: { [lockid: string]: { [slotid: string]: string }}
+    entitymap: { [lockid: string]: { entity: string, name: string } }
 }
 
 @customElement('locks-panel')
 export class MyLocksPanel extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property({ type: Boolean, reflect: true }) public narrow!: boolean;
+    @property() public hass!: HomeAssistant;
+    @property({ type: Boolean, reflect: true }) public narrow!: boolean;
 
     data: LocksyData = {
         codes: {},
-        slots: {}
+        slots: {},
+        entitymap: {}
     };
 
     async firstUpdated() {
+        await customElements.whenDefined("ha-app-layout");
+        await customElements.whenDefined("state-info");
+
         window.addEventListener('location-changed', () => {
-          this.requestUpdate();
+            this.requestUpdate();
         });
 
         this.hass!.connection.subscribeMessage((msgdata: LocksyData) => {
@@ -31,9 +36,19 @@ export class MyLocksPanel extends LitElement {
         }, { type: 'locksy/updates'}, { resubscribe: true })
     }
 
+    getStateForLockId(lockid: string) {
+        return this.hass.states[this.data.entitymap[lockid].entity]
+    }
+
+    moreInfo(lockid: string) {
+        //console.error(ev)
+        fireEvent(this, "hass-more-info", { entityId: this.data.entitymap[lockid].entity });
+    }
+
     render() {
         if (!customElements.get('ha-app-layout')) return html`loading...`;
-        
+        if (!customElements.get('state-info')) return html`loading...`;
+
         return html`
           <ha-app-layout>
             <app-header fixed slot="header">
@@ -57,7 +72,12 @@ export class MyLocksPanel extends LitElement {
             <ha-card header="Locations">
                 <div class="loctable">
                     ${Object.keys(this.data.slots).map(lockid => html`
-                        <div class='lockid'>${lockid}</div>
+                        <div class='lockid'>
+                            <div class='clickwrap' @click=${() => this.moreInfo(lockid)}>
+                                <state-badge .hass=${this.hass} .stateObj=${this.getStateForLockId(lockid)}></state-badge>
+                                <div class='lname'>${this.data.entitymap[lockid].name}</div>
+                            </div>
+                        </div>
                         <div class='slottable'>
                         ${Object.keys(this.data.slots[lockid]).map(slotid => html`
                             <div class='slot'>${slotid}</div>
@@ -78,25 +98,25 @@ export class MyLocksPanel extends LitElement {
     }
 
     static get styles(): CSSResultGroup {
-      return css` 
-      app-header,
-      app-toolbar {
-        background-color: var(--app-header-background-color);
-        font-weight: 400;
-        color: var(--app-header-text-color, white);
-      }
-      app-toolbar {
-        height: var(--header-height);
-      }
+        return css` 
+        app-header,
+        app-toolbar {
+            background-color: var(--app-header-background-color);
+            font-weight: 400;
+            color: var(--app-header-text-color, white);
+        }
+        app-toolbar {
+            height: var(--header-height);
+        }
 
-      ha-app-layout {
-        display: block;
-        z-index: 2;
-      }
+        ha-app-layout {
+            display: block;
+            z-index: 2;
+        }
 
-      app-toolbar [main-title] {
-        margin-left: 20px;
-      }
+        app-toolbar [main-title] {
+            margin-left: 20px;
+        }
 
         .nametable { 
             display: grid;
@@ -122,10 +142,26 @@ export class MyLocksPanel extends LitElement {
             grid-gap: 10px;
         }
 
-        :host {
-          color: var(--primary-text-color);
-          --paper-card-header-color: var(--primary-text-color);
+        .clickwrap {
+            display: inline-flex;
+            cursor: pointer;
+            align-items: center;
         }
-      `;
+
+        .clickwrap > * {
+            flex-grow: 1;
+        }
+
+        .aname {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        :host {
+        color: var(--primary-text-color);
+        --paper-card-header-color: var(--primary-text-color);
+        }
+        `;
     }
 }
