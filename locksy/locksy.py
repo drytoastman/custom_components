@@ -5,7 +5,7 @@ import attr
 import logging
 from typing import Callable, Dict, List
 from homeassistant.const import MATCH_ALL
-from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.dispatcher import async_dispatcher_send, dispatcher_send
 
 from zwave_js_server.model.value import Value
 from zwave_js_server.model.node import Node as ZWaveNode
@@ -21,7 +21,7 @@ from homeassistant.helpers import entity_registry
 
 from . import const
 
-_LOGGER = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def tryint(val):
     try:
@@ -37,8 +37,8 @@ def intkeys(val):
 
 testmode = False
 if testmode:
-    async def set_usercode(node, slot, code):  _LOGGER.debug("set_usercode({}, {}, {})".format(node.node_id, slot, code))
-    async def clear_usercode(node, slot): _LOGGER.debug("clear_usercode({}, {})".format(node.node_id, slot))
+    async def set_usercode(node, slot, code): log.debug("set_usercode({}, {}, {})".format(node.node_id, slot, code))
+    async def clear_usercode(node, slot):     log.debug("clear_usercode({}, {})".format(node.node_id, slot))
 else:
     from zwave_js_server.util.lock import set_usercode, clear_usercode
 
@@ -103,7 +103,8 @@ class Locksy:
                     'entity': eid,
                     'name': ent.name or ent.original_name or eid
                 }
-        _LOGGER.debug("idmap = {}".format(self.idmap))
+        log.debug("idmap = {}".format(self.idmap))
+        dispatcher_send(self.hass, "locksy_updated")
 
 
     async def setup(self, client: ZWaveClient):
@@ -125,7 +126,7 @@ class Locksy:
 
     async def dataChanged(self):
         data = self.data.getAll()
-        _LOGGER.debug("saving {}".format(data))
+        log.debug("saving {}".format(data))
         await self.storage.async_save(data)
         async_dispatcher_send(self.hass, "locksy_updated")
 
@@ -138,14 +139,14 @@ class Locksy:
         in_use = value.value and value.value == CodeSlotStatus.ENABLED
         current = self.data.slots[value.node.node_id].get(code_slot, None)
 
-        _LOGGER.debug("lock {} code slot {} in_use {} current {}".format(value.node.node_id, code_slot, in_use, current))
+        log.debug("lock {} code slot {} in_use {} current {}".format(value.node.node_id, code_slot, in_use, current))
 
         if in_use and not current:
-            _LOGGER.debug("marking busy slot {}:{} as external".format(value.node.node_id, code_slot))
+            log.debug("marking busy slot {}:{} as external".format(value.node.node_id, code_slot))
             self.data.slots[value.node.node_id][code_slot] = 'external'
             if save: await self.dataChanged()
         elif not in_use and current:
-            _LOGGER.debug("clearing slot {}:{} as its showing as free".format(value.node.node_id, code_slot))
+            log.debug("clearing slot {}:{} as its showing as free".format(value.node.node_id, code_slot))
             del self.data.slots[value.node.node_id][code_slot]
             if save: await self.dataChanged()
 
@@ -173,23 +174,35 @@ class Locksy:
             unload()
 
 
-    async def setCodes(self, codes: Dict[str, str]):
-        for name in codes:
-            if name == 'external':
-                raise HomeAssistantError("Cannot use 'external' for code name")
+    async def addCode(self, name: str, code: str):
+        if name == 'external':
+            raise HomeAssistantError("Cannot use 'external' for code name")
+        self.data.codes[name] = code
+        await self.dataChanged()
 
-        removedcodes = self.data.codes.keys() - codes.keys()
+
+    async def changeCode(self, name: str, code: str):
+        if name not in self.data.codes:
+            raise HomeAssistantError("No such code name")
+        if name == 'external':
+            raise HomeAssistantError("Cannot use 'external' for code name")            
         for lockid in self.data.slots:
-            if set(self.data.namesOnLock(lockid)) & removedcodes:
-                raise HomeAssistantError("Removing code that is still assigned to a lock")
+            for _name in self.data.namesOnLock(lockid):
+                if _name == name:
+                    log.debug("code assigned to lock was changed, updating")
+                    await self.assignToASlot(lockid, name, code)
+        self.data.codes[name] = code
+        await self.dataChanged()
 
-        changedcodes = set([c for c in codes if c in self.data.codes and codes[c] != self.data.codes[c]])
+
+    async def deleteCode(self, name: str):
+        if name not in self.data.codes:
+            raise HomeAssistantError("No such code name")
         for lockid in self.data.slots:
-            if set(self.data.namesOnLock(lockid)) & changedcodes:
-                _LOGGER.debug("code assigned to lock was changed, updating")
-                await self.assignToASlot(lockid, name, codes[name])
-
-        self.data.codes = codes
+            for _name in self.data.namesOnLock(lockid):
+                if _name == name:
+                    raise HomeAssistantError("Removing code that is still assigned to a lock")
+        del self.data.codes[name]
         await self.dataChanged()
 
 
@@ -208,18 +221,18 @@ class Locksy:
         if slotid:
             await clear_usercode(self.nodes[lockid], slotid)
         else:
-            _LOGGER.error("{} is not assigned to a slot in {}, nothing to remove".format(name, lockid))
+            log.error("{} is not assigned to a slot in {}, nothing to remove".format(name, lockid))
 
 
     async def assignToASlot(self, lockid: int, name: str, value: str):
-        _LOGGER.debug("assignToASlot {} {} {}".format(lockid, name, value))
+        log.debug("assignToASlot {} {} {}".format(lockid, name, value))
         slotid = self.data.nameToSlot(lockid, name)
         if slotid:
-            _LOGGER.debug("Name already present on lock {}, updating slotid {}".format(lockid, slotid))
+            log.debug("Name already present on lock {}, updating slotid {}".format(lockid, slotid))
             await set_usercode(self.nodes[lockid], slotid, value)
         else:
             free = list(set(range(1,21)) - self.data.slots[lockid].keys())[0]
-            _LOGGER.debug("Name not present on lock {}, picking free slotid {}".format(lockid, free))
+            log.debug("Name not present on lock {}, picking free slotid {}".format(lockid, free))
             await set_usercode(self.nodes[lockid], free, value)
             self.data.slots[lockid][free] = name
             await self.dataChanged()

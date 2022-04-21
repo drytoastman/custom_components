@@ -29,18 +29,16 @@ async def websocket_updates(hass: HomeAssistant, connection: ActiveConnection, m
     send_data(hass.data[const.DOMAIN], connection, msg["id"])
 
 
-PANEL_URL = "/api/panel_custom/locks-panel"
+PANEL_URL = "/api/panel_custom/locksy"
 
 @callback
 async def register_frontend(hass: HomeAssistant):
     websocket_api.async_register_command(hass, "locksy/updates", websocket_updates,  
         websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({vol.Required("type"): "locksy/updates"}))
 
-    view_url = os.path.join(hass.config.path('custom_components'), 'locksy/frontend/dist/locks-panel.js')
-
     hass.http.register_static_path(
         PANEL_URL,
-        view_url,
+        os.path.join(hass.config.path('custom_components'), 'locksy/frontend/dist/'),
         cache_headers=False
     )
 
@@ -48,9 +46,9 @@ async def register_frontend(hass: HomeAssistant):
         hass,
         webcomponent_name='locks-panel',
         frontend_url_path='locksy',
-        module_url=PANEL_URL,
+        module_url=PANEL_URL+'/locks-panel.js',
         sidebar_title='Locksy',
-        sidebar_icon='mdi:shield-home',
+        sidebar_icon='mdi:lock',
         require_admin=True,
         config={},
     )

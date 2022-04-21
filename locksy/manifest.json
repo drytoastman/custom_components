@@ -3,7 +3,7 @@
   "name": "Locksy",
   "documentation": "https://github.com/drytoastman/locksy",
   "version": "v0.0.1",
-  "requirements": ["zwave-js-server-python"],
+  "requirements": [],
   "dependencies": [
     "http",
     "panel_custom",

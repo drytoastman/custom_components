@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import voluptuous as vol
+from homeassistant.exceptions import HomeAssistantError
 
 from zwave_js_server.client import Client as ZWaveClient
 from homeassistant.components.zwave_js.const import DATA_CLIENT, DOMAIN as ZWAVEJS_DOMAIN
@@ -23,19 +24,29 @@ _LOGGER = logging.getLogger(__name__)
 @callback
 def register_services(hass: HomeAssistant):
     """Register services used by Locksy component."""
-    async def set_codes(call):
+    async def add_code(call):
         locksy:Locksy = hass.data[const.DOMAIN]
-        await locksy.setCodes(call.data)
-    async_register_admin_service(hass, const.DOMAIN, "set_codes", set_codes, schema=vol.Schema({cv.string: cv.string}))
+        await locksy.addCode(**call.data)
+    async_register_admin_service(hass, const.DOMAIN, "add_code", add_code, schema=vol.Schema({'name': str, 'code': str}))
+
+    async def change_code(call):
+        locksy:Locksy = hass.data[const.DOMAIN]
+        await locksy.changeCode(**call.data)
+    async_register_admin_service(hass, const.DOMAIN, "change_code", change_code, schema=vol.Schema({'name': str, 'code': str}))
+
+    async def delete_code(call):
+        locksy:Locksy = hass.data[const.DOMAIN]
+        await locksy.deleteCode(**call.data)
+    async_register_admin_service(hass, const.DOMAIN, "delete_code", delete_code, schema=vol.Schema({'name': str}))
 
     async def add_name_to_lock(call):
         locksy:Locksy = hass.data[const.DOMAIN]
-        await locksy.addNameToLock(call.data['name'], call.data['lockid'])
+        await locksy.addNameToLock(**call.data)
     async_register_admin_service(hass, const.DOMAIN, "add_name_to_lock", add_name_to_lock, schema=vol.Schema({'name': str, 'lockid': int}))
 
     async def remove_name_from_lock(call):
         locksy:Locksy = hass.data[const.DOMAIN]
-        await locksy.removeNameFromLock(call.data['name'], call.data['lockid'])
+        await locksy.removeNameFromLock(**call.data)
     async_register_admin_service(hass, const.DOMAIN, "remove_name_from_lock", remove_name_from_lock, schema=vol.Schema({'name': str, 'lockid': int}))
 
 
@@ -48,18 +59,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Locksy integration from a config entry."""
-    #session = async_get_clientsession(hass)
-    """"
-    client = ZWaveClient(entry.data['url'], async_get_clientsession(hass))
-    driver_ready = asyncio.Event()
-    await client.connect()
-    listen_task = asyncio.create_task(client.listen(driver_ready))
-    await driver_ready.wait()
-    """
+
+    if ZWAVEJS_DOMAIN not in hass.data or not len(hass.data[ZWAVEJS_DOMAIN].values()):
+        raise HomeAssistantError("No valid zwave_js setup, cannot install locksy")
+
     client = list(hass.data[ZWAVEJS_DOMAIN].values())[0][DATA_CLIENT]
     while not client.driver:
         await asyncio.sleep(1)
