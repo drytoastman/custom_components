@@ -42,12 +42,12 @@ def register_services(hass: HomeAssistant):
     async def add_name_to_lock(call):
         locksy:Locksy = hass.data[const.DOMAIN]
         await locksy.addNameToLock(**call.data)
-    async_register_admin_service(hass, const.DOMAIN, "add_name_to_lock", add_name_to_lock, schema=vol.Schema({'name': str, 'lockid': int}))
+    async_register_admin_service(hass, const.DOMAIN, "add_name_to_lock", add_name_to_lock, schema=vol.Schema({'name': str, 'lockid': str}))
 
     async def remove_name_from_lock(call):
         locksy:Locksy = hass.data[const.DOMAIN]
         await locksy.removeNameFromLock(**call.data)
-    async_register_admin_service(hass, const.DOMAIN, "remove_name_from_lock", remove_name_from_lock, schema=vol.Schema({'name': str, 'lockid': int}))
+    async_register_admin_service(hass, const.DOMAIN, "remove_name_from_lock", remove_name_from_lock, schema=vol.Schema({'name': str, 'lockid': str}))
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):

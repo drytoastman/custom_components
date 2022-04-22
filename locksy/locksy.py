@@ -66,6 +66,16 @@ class LocksyData:
         return { "codes": self.codes, "slots": self.slots }
 
 
+def validate_name(name: str):
+    l = len(name)
+    if l < 3: raise HomeAssistantError("Name is too short ({} < 3".format(l))
+    if l > 20: raise HomeAssistantError("Name is too long ({} > 20)".format(l))
+    if name == 'external': raise HomeAssistantError("Cannot use 'external' for code name")    
+
+def validate_code(code: str):
+    if len(code) != 4: raise HomeAssistantError("Code is not 4 digits long")
+    try: int(code)
+    except: raise HomeAssistantError("Code is not all numerical digits")
 
 def slot_info(value: Value):
     is_slot = value.command_class == CommandClass.USER_CODE and value.property_name == LOCK_USERCODE_STATUS_PROPERTY
@@ -175,17 +185,18 @@ class Locksy:
 
 
     async def addCode(self, name: str, code: str):
-        if name == 'external':
-            raise HomeAssistantError("Cannot use 'external' for code name")
+        validate_name(name)
+        validate_code(code)
         self.data.codes[name] = code
         await self.dataChanged()
 
 
     async def changeCode(self, name: str, code: str):
+        validate_name(name)
+        validate_code(code)
         if name not in self.data.codes:
             raise HomeAssistantError("No such code name")
-        if name == 'external':
-            raise HomeAssistantError("Cannot use 'external' for code name")            
+
         for lockid in self.data.slots:
             for _name in self.data.namesOnLock(lockid):
                 if _name == name:
@@ -206,22 +217,34 @@ class Locksy:
         await self.dataChanged()
 
 
-    async def addNameToLock(self, name: str, lockid: int):
-        if name == 'external':
-            raise HomeAssistantError("Cannot use 'external' for code name")        
-        if name not in self.data.codes:
-            raise HomeAssistantError("{} is not a valid code name".format(name))
-        await self.assignToASlot(lockid, name, self.data.codes[name])
+    async def addNameToLock(self, name: str, lockid: str):
+        try:
+            lockid = int(lockid)
+            if name == 'external':
+                raise HomeAssistantError("Cannot use 'external' for code name")        
+            if name not in self.data.codes:
+                raise HomeAssistantError("{} is not a valid code name".format(name))
+            await self.assignToASlot(lockid, name, self.data.codes[name])
+        except HomeAssistantError:
+            raise
+        except Exception as e:
+            raise HomeAssistantError(e)            
 
 
-    async def removeNameFromLock(self, name: str, lockid: int):
-        if name == 'external':
-            raise HomeAssistantError("Cannot use 'external' for code name")        
-        slotid = self.data.nameToSlot(lockid, name)
-        if slotid:
-            await clear_usercode(self.nodes[lockid], slotid)
-        else:
-            log.error("{} is not assigned to a slot in {}, nothing to remove".format(name, lockid))
+    async def removeNameFromLock(self, name: str, lockid: str):
+        try:
+            lockid = int(lockid)
+            if name == 'external':
+                raise HomeAssistantError("Cannot use 'external' for code name")        
+            slotid = self.data.nameToSlot(lockid, name)
+            if slotid:
+                await clear_usercode(self.nodes[lockid], slotid)
+            else:
+                log.error("{} is not assigned to a slot in {}, nothing to remove".format(name, lockid))
+        except HomeAssistantError:
+            raise
+        except Exception as e:
+            raise HomeAssistantError(e)
 
 
     async def assignToASlot(self, lockid: int, name: str, value: str):
