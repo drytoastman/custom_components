@@ -244,7 +244,7 @@ class Locksy:
         except HomeAssistantError:
             raise
         except Exception as e:
-            raise HomeAssistantError(e)
+            raise HomeAssistantError(repr(e))
 
 
     async def assignToASlot(self, lockid: int, name: str, value: str):
