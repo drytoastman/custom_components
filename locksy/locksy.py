@@ -234,8 +234,6 @@ class Locksy:
     async def removeNameFromLock(self, name: str, lockid: str):
         try:
             lockid = int(lockid)
-            if name == 'external':
-                raise HomeAssistantError("Cannot use 'external' for code name")        
             slotid = self.data.nameToSlot(lockid, name)
             if slotid:
                 await clear_usercode(self.nodes[lockid], slotid)
