@@ -40,10 +40,6 @@ export class ThermyRow extends LitElement {
     }
 
     protected render(): TemplateResult | void {
-        // TODO Check for stateObj or other necessary things and render a warning if missing
-        if (this.config.show_warning) {
-            return this._showWarning("Warning");
-        }
         if (this.config.show_error) {
             return this._showError("Error");
         }
@@ -59,9 +55,9 @@ export class ThermyRow extends LitElement {
         return html`
         <div class='outercontainer'>
             ${hvac.attributes.friendly_name}
-            <mode-control .hass=${this.hass} .hvac=${hvac}></mode-control>
+            <mode-control  .hass=${this.hass} .hvac=${hvac}></mode-control>
             <timer-control .hass=${this.hass} .thermyState=${thermy}></timer-control>
-            <temp-control .hass=${this.hass} .hvac=${hvac}></temp-control>
+            <temp-control  .hass=${this.hass} .hvac=${hvac}></temp-control>
 
             <div class='statusbox' @click=${() => fireEvent(this, "hass-more-info", { entityId: hvac.entity_id })}>
                 <span>${temp.state} ${this.hass.config.unit_system.temperature}</span>
@@ -72,17 +68,12 @@ export class ThermyRow extends LitElement {
         `;
     }
 
-
-    private _showWarning(warning: string): TemplateResult {
-        return html`<hui-warning>${warning}</hui-warning>`;
-    }
-
     private _showError(error: string): TemplateResult {
         const errorCard = document.createElement('hui-error-card');
         errorCard.setConfig({
-        type: 'error',
-        error,
-        origConfig: this.config,
+            type: 'error',
+            error,
+            origConfig: this.config,
         });
         return html` ${errorCard} `;
     }
