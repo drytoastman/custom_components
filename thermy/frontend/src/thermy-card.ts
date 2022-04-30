@@ -1,3 +1,5 @@
+import './timer-control'
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CSSResultGroup, LitElement, PropertyValues, TemplateResult, css, html } from 'lit';
 import type { ClimateState, SensorState, ThermyCardConfig, ThermyState } from './types';
@@ -6,7 +8,7 @@ import {
   fireEvent,
 } from 'custom-card-helpers';
 import { customElement, property, state } from 'lit/decorators';
-import { mdiAirConditioner, mdiCameraTimer, mdiCircleOffOutline, mdiFan, mdiFire, mdiMinusCircle, mdiPlusCircle, mdiSnowflake, mdiWeatherRainy } from '@mdi/js'
+import { mdiAirConditioner, mdiCircleOffOutline, mdiFan, mdiFire, mdiMinusCircle, mdiPlusCircle, mdiSnowflake, mdiWeatherRainy } from '@mdi/js'
 
 // This puts your card into the UI card picker dialog
 (window as any).customCards = (window as any).customCards || [];
@@ -20,20 +22,15 @@ import { mdiAirConditioner, mdiCameraTimer, mdiCircleOffOutline, mdiFan, mdiFire
 export class ThermyCard extends LitElement {
     @property({ attribute: false }) public hass!: HomeAssistant;
     @state() private config!: ThermyCardConfig;
-    @state() private timerLeft!: number | null;
-    @state() private interval!: NodeJS.Timer;
 
     public setConfig(config: ThermyCardConfig): void {
         if (!config) { throw new Error("Invalid Configuration"); }
         this.config = { name: 'Thermy', ...config };
-
-        if (this.interval) clearInterval(this.interval)
-        this.interval = setInterval(this.periodic.bind(this), 500)
     }
 
 
     protected shouldUpdate(changedProps: PropertyValues): boolean {
-        if (changedProps.has("config") || changedProps.has('timerLeft')) { return true; }
+        if (changedProps.has("config")) { return true; }
 
         const oldHass = changedProps.get("hass") as HomeAssistant;
         if (!oldHass) return false;
@@ -94,29 +91,11 @@ export class ThermyCard extends LitElement {
         fireEvent(this, "hass-more-info", { entityId })
     }
 
-    protected timer(entity_id: string, timeout: number) {
-        console.warn("call service")
-        this.hass.callService('thermy', 'offtimer', { entity_id, timeout })
-    }
-
     protected setmode(entity_id: string, hvac_mode: string) {
         console.warn("call service")
         this.hass.callService('climate', 'set_hvac_mode', { entity_id, hvac_mode })
     }
 
-
-    protected periodic() {
-        if (!this.config || !this.config.entity) return;
-        const thermy = this.hass.states[this.config.entity] as unknown as ThermyState
-        if (!thermy.attributes.stoptime) {
-            this.timerLeft = null
-            return;
-        }
-
-        const endtime = new Date(thermy.attributes.stoptime + 'Z').getTime()
-        const now = new Date().getTime()
-        this.timerLeft = Math.round((endtime - now)/1000)
-    }
 
     protected render(): TemplateResult | void {
         // TODO Check for stateObj or other necessary things and render a warning if missing
@@ -147,15 +126,7 @@ export class ThermyCard extends LitElement {
                 ${hvac.attributes.friendly_name}
             </div>
 
-            <div class='timerbox'>
-                <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
-                    <ha-icon-button label="off timer" .path=${mdiCameraTimer} slot="trigger" .style="color: ${this.timerLeft !== null ? 'green' : 'grey'}"></ha-icon-button>
-                    ${[15,30,60,120].map((item) =>
-                        html`<mwc-list-item @click=${() => this.timer(thermy.entity_id, item)}>${item}</mwc-list-item>`
-                    )}
-                </ha-button-menu>
-                ${this.timerLeft}
-            </div>
+            <timer-control .hass=${this.hass} .thermyState=${thermy}></timer-control>
 
             <div class='tempcontrol'>
                 <ha-icon-button .path=${mdiMinusCircle}></ha-icon-button>
@@ -204,19 +175,12 @@ export class ThermyCard extends LitElement {
             .outercontainer {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-start;
             }
 
             .stateicon, .statusbox {
                 display: flex;
                 flex-direction: column;
-            }
-
-            .timerbox {
-                display: flex;
-                flex-direction: column;
-                align-self: flex-start;
-                align-items: center;
             }
 
             .statusbox {
