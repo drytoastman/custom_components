@@ -1,26 +1,15 @@
 import './timer-control'
 import './mode-control'
+import './temp-control'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CSSResultGroup, LitElement, PropertyValues, TemplateResult, css, html } from 'lit';
 import type { ClimateState, SensorState, ThermyCardConfig, ThermyState } from './types';
-import {
-  HomeAssistant,
-  fireEvent,
-} from 'custom-card-helpers';
+import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { customElement, property, state } from 'lit/decorators';
-import { mdiMinusCircle, mdiPlusCircle } from '@mdi/js'
 
-// This puts your card into the UI card picker dialog
-(window as any).customCards = (window as any).customCards || [];
-(window as any).customCards.push({
-  type: 'thermy-card',
-  name: 'Thermy Card',
-  description: 'thermy',
-});
-
-@customElement('thermy-card')
-export class ThermyCard extends LitElement {
+@customElement('thermy-row')
+export class ThermyRow extends LitElement {
     @property({ attribute: false }) public hass!: HomeAssistant;
     @state() private config!: ThermyCardConfig;
 
@@ -28,7 +17,6 @@ export class ThermyCard extends LitElement {
         if (!config) { throw new Error("Invalid Configuration"); }
         this.config = { name: 'Thermy', ...config };
     }
-
 
     protected shouldUpdate(changedProps: PropertyValues): boolean {
         if (changedProps.has("config")) { return true; }
@@ -50,12 +38,6 @@ export class ThermyCard extends LitElement {
 
         return false
     }
-
-
-    protected moreInfo(entityId: string) {
-        fireEvent(this, "hass-more-info", { entityId })
-    }
-
 
     protected render(): TemplateResult | void {
         // TODO Check for stateObj or other necessary things and render a warning if missing
@@ -79,14 +61,9 @@ export class ThermyCard extends LitElement {
             ${hvac.attributes.friendly_name}
             <mode-control .hass=${this.hass} .hvac=${hvac}></mode-control>
             <timer-control .hass=${this.hass} .thermyState=${thermy}></timer-control>
+            <temp-control .hass=${this.hass} .hvac=${hvac}></temp-control>
 
-            <div class='tempcontrol'>
-                <ha-icon-button .path=${mdiMinusCircle}></ha-icon-button>
-                <span class='temperature'>${hvac.attributes.temperature}</span>
-                <ha-icon-button .path=${mdiPlusCircle}></ha-icon-button>
-            </div>
-
-            <div class='statusbox' @click=${() => this.moreInfo(hvac.entity_id)}>
+            <div class='statusbox' @click=${() => fireEvent(this, "hass-more-info", { entityId: hvac.entity_id })}>
                 <span>${temp.state} ${this.hass.config.unit_system.temperature}</span>
                 <span>${humid.state} %</span>
                 <span class='unittemp'>unit: ${hvac.attributes.current_temperature} ${this.hass.config.unit_system.temperature}</span>
@@ -110,20 +87,8 @@ export class ThermyCard extends LitElement {
         return html` ${errorCard} `;
     }
 
-    // https://lit.dev/docs/components/styles/
     static get styles(): CSSResultGroup {
         return css`
-            .stategrid {
-                display: inline-grid;
-                grid-template-columns: auto auto;
-                grid-template-rows: auto;
-                grid-template-areas:
-                    "temperature current_temperature"
-                    "state hvac_action"
-                    "fan_mode swing_mode";
-                grid-column-gap: 1rem;
-            }
-
             .outercontainer {
                 display: flex;
                 justify-content: space-between;
@@ -134,16 +99,6 @@ export class ThermyCard extends LitElement {
                 display: flex;
                 flex-direction: column;
                 align-items: end;
-            }
-
-            .tempcontrol {
-                display: flex;
-                align-items: center;
-                font-size: 250%;
-            }
-
-            .tempcontrol ha-icon-button {
-                color: #222;
             }
 
             .unittemp {
