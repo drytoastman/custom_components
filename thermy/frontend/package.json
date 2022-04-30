@@ -1,0 +1,32 @@
+{
+  "name": "thermo-card",
+  "version": "0.0.1",
+  "description": "thermo card",
+  "module": "thermo-card.js",
+  "dependencies": {
+    "@mdi/js": "^6.6.96",
+    "custom-card-helpers": "^1.9.0",
+    "home-assistant-js-websocket": "^7.0.3",
+    "lit": "^2.2.2"
+  },
+  "scripts": {
+    "start": "rollup -c rollup.config.js --watch",
+    "build": "npm run lint && npm run rollup",
+    "lint": "eslint src/*.ts",
+    "rollup": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "eslint": "^8.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "rollup": "^2.70.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-typescript2": "^0.31.2",
+    "typescript": "^4.6.3"
+  }
+}
