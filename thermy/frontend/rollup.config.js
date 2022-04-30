@@ -30,7 +30,7 @@ const plugins = [
 
 export default [
   {
-    input: 'src/thermy-card.ts',
+    input: 'src/thermy-row.ts',
     output: {
       dir: 'dist',
       format: 'es',
