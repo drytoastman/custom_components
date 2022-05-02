@@ -37,7 +37,7 @@ export class TimerControl extends LitElement {
             return;
         }
 
-        const endtime = new Date(this.thermyState.attributes.stoptime + 'Z').getTime()
+        const endtime = new Date(this.thermyState.attributes.stoptime).getTime()
         const now = new Date().getTime()
         this.timerLeft = Math.floor((endtime - now)/1000)
     }
@@ -56,7 +56,7 @@ export class TimerControl extends LitElement {
             return html`
                 <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
                     <ha-icon-button label="start off timer" .path=${mdiCameraTimer} slot="trigger" class='timerbutton'></ha-icon-button>
-                    ${[1,5,15,30,60,120].map((item) =>
+                    ${[5,15,30,60,120].map((item) =>
                         html`<mwc-list-item @click=${() => this.starttimer(item)}>${item}</mwc-list-item>`
                     )}
                 </ha-button-menu>

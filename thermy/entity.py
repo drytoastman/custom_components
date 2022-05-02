@@ -71,7 +71,7 @@ class ThermyEntity(Entity):
             self.canceltimer()
 
         self.clearunsub()
-        self.stoptime = datetime.datetime.utcnow() + datetime.timedelta(seconds=timeout)
+        self.stoptime = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timeout)
         self.unsub = async_track_point_in_utc_time(self.hass, complete, self.stoptime)
         self.timerstate = const.STATUS_ACTIVE
         self.async_write_ha_state()
