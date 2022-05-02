@@ -8,6 +8,11 @@ import type { ClimateState, SensorState, ThermyCardConfig, ThermyState } from '.
 import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { customElement, property, state } from 'lit/decorators';
 
+function sround(value: string, decimal: number) {
+    const scale = decimal*10
+    return Math.round(parseFloat(value)*scale)/scale
+}
+
 @customElement('thermy-row')
 export class ThermyRow extends LitElement {
     @property({ attribute: false }) public hass!: HomeAssistant;
@@ -71,8 +76,8 @@ export class ThermyRow extends LitElement {
             <div class='statusbox'>
                 ${hvac.attributes.remote_temp?
                     html `
-                        <span @click=${()=>this.more(temp.entity_id)}>${temp.state} ${this.hass.config.unit_system.temperature}</span>
-                        <span @click=${()=>this.more(humid.entity_id)}>${humid.state} %</span>
+                        <span @click=${()=>this.more(temp.entity_id)}>${sround(temp.state, 1)} ${this.hass.config.unit_system.temperature}</span>
+                        <span @click=${()=>this.more(humid.entity_id)}>${sround(humid.state, 1)} %</span>
                         ` :
                     html `
                         <span>unit: ${hvac.attributes.current_temperature} ${this.hass.config.unit_system.temperature}</span>`

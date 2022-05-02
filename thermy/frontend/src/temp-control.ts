@@ -38,7 +38,7 @@ export class TempControl extends LitElement {
     protected tempColor(): string {
         if (this.isSetting) return "orange"
         if (this.workingTemp) return "red"
-        return "black"
+        return "currentColor"
     }
 
     protected render(): TemplateResult | void {
@@ -62,7 +62,6 @@ export class TempControl extends LitElement {
                 display: flex;
                 align-items: center;
                 font-size: 250%;
-                color: #333;
             }
         `
     }
