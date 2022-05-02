@@ -10,10 +10,8 @@
     "lit": "^2.2.2"
   },
   "scripts": {
-    "start": "rollup -c rollup.config.js --watch",
-    "build": "npm run lint && npm run rollup",
-    "lint": "eslint src/*.ts",
-    "rollup": "rollup -c"
+    "dev": "rollup -c rollup.config.js --watch",
+    "build": "npm run lint && npm run rollup"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",

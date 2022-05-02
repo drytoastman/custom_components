@@ -55,6 +55,9 @@ export class TempControl extends LitElement {
 
     static get styles(): CSSResultGroup {
         return css`
+            ha-icon-button {
+                --mdc-icon-button-size: 40px;
+            }
             .tempcontrol {
                 display: flex;
                 align-items: center;

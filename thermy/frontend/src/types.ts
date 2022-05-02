@@ -47,6 +47,8 @@ export interface ClimateState extends HassEntity {
         friendly_name: string
         supported_features: number
         unit_of_measurement: string
+        remote_temp: number
+        compressor_frequency: number
     }
 }
 

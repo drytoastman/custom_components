@@ -39,6 +39,10 @@ export class ThermyRow extends LitElement {
         return false
     }
 
+    protected more(entityId: string) {
+        fireEvent(this, "hass-more-info", { entityId })
+    }
+
     protected render(): TemplateResult | void {
         if (this.config.show_error) {
             return this._showError("Error");
@@ -54,15 +58,25 @@ export class ThermyRow extends LitElement {
 
         return html`
         <div class='outercontainer'>
-            ${hvac.attributes.friendly_name}
             <mode-control  .hass=${this.hass} .hvac=${hvac}></mode-control>
+            <span class='aligner'></span>
+            <span class='name' @click=${() => this.more(hvac.entity_id)}>
+                ${hvac.attributes.friendly_name}
+            </span>
+            <span class='filler'></span>
             <timer-control .hass=${this.hass} .thermyState=${thermy}></timer-control>
+            <span class='filler'></span>
             <temp-control  .hass=${this.hass} .hvac=${hvac}></temp-control>
-
-            <div class='statusbox' @click=${() => fireEvent(this, "hass-more-info", { entityId: hvac.entity_id })}>
-                <span>${temp.state} ${this.hass.config.unit_system.temperature}</span>
-                <span>${humid.state} %</span>
-                <span class='unittemp'>unit: ${hvac.attributes.current_temperature} ${this.hass.config.unit_system.temperature}</span>
+            <span class='filler'></span>
+            <div class='statusbox'>
+                ${hvac.attributes.remote_temp?
+                    html `
+                        <span @click=${()=>this.more(temp.entity_id)}>${temp.state} ${this.hass.config.unit_system.temperature}</span>
+                        <span @click=${()=>this.more(humid.entity_id)}>${humid.state} %</span>
+                        ` :
+                    html `
+                        <span>unit: ${hvac.attributes.current_temperature} ${this.hass.config.unit_system.temperature}</span>`
+                }
             </div>
         </div>
         `;
@@ -83,18 +97,21 @@ export class ThermyRow extends LitElement {
             .outercontainer {
                 display: flex;
                 justify-content: space-between;
-                align-items: flex-start;
+                align-items: center;
+            }
+
+            .aligner {
+                display: block;
+                width: 16px;
+            }
+            .filler {
+                flex-grow: 1;
             }
 
             .statusbox {
                 display: flex;
                 flex-direction: column;
                 align-items: end;
-            }
-
-            .unittemp {
-                font-size: 90%;
-                color: grey;
             }
         `;
     }

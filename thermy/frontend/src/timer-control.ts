@@ -48,15 +48,15 @@ export class TimerControl extends LitElement {
             const sec = ('00'+this.timerLeft%60).slice(-2)
             return html`
                 <div class='timercontrol'>
-                    <ha-icon-button label="cancel timer" .path=${mdiCloseCircle} style="color: #ff6000" @click=${() => this.stoptimer()}></ha-icon-button>
+                    <ha-icon-button label="cancel timer" .path=${mdiCloseCircle} class='cancelbutton' @click=${() => this.stoptimer()}></ha-icon-button>
                     <span>${min}:${sec}</span>
                 </div>
             `;
         } else {
             return html`
                 <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
-                    <ha-icon-button label="start off timer" .path=${mdiCameraTimer} slot="trigger" .style="color: ${this.timerLeft !== null ? 'green' : 'grey'}"></ha-icon-button>
-                    ${[15,30,60,120].map((item) =>
+                    <ha-icon-button label="start off timer" .path=${mdiCameraTimer} slot="trigger" class='timerbutton'></ha-icon-button>
+                    ${[5,15,30,60,120].map((item) =>
                         html`<mwc-list-item @click=${() => this.starttimer(item)}>${item}</mwc-list-item>`
                     )}
                 </ha-button-menu>
@@ -66,6 +66,18 @@ export class TimerControl extends LitElement {
 
     static get styles(): CSSResultGroup {
         return css`
+            ha-icon-button {
+                --mdc-icon-button-size: 24px;
+            }
+
+            .timerbutton {
+                color: grey;
+            }
+
+            .cancelbutton {
+                color: #ff6000
+            }
+
             .timercontrol {
                 display: flex;
                 flex-direction: column;

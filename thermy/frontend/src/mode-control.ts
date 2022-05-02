@@ -55,7 +55,7 @@ export class ModeControl extends LitElement {
         return html`
             <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
                 <ha-icon-button label="select mode" .path=${this.getStateIcon()} slot="trigger" .style="color: ${this.getStateColor()}"></ha-icon-button>
-                ${this.hvac.attributes.hvac_modes.map((item) =>
+                ${this.hvac.attributes.hvac_modes.filter(item => !['heat_cool', 'dry'].includes(item)).map((item) =>
                     html`<mwc-list-item @click=${() => this.setmode(item)}>${item}</mwc-list-item>`
                 )}
             </ha-button-menu>
@@ -64,6 +64,9 @@ export class ModeControl extends LitElement {
 
     static get styles(): CSSResultGroup {
         return css`
+            ha-button-menu {
+                --mdc-icon-button-size: 40px;
+            }
         `
     }
 }
