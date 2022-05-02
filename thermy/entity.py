@@ -26,7 +26,7 @@ class ThermyEntity(Entity):
         self.humidid   = conf['sensorid'] + "_humidity"
 
         self.stoptime  = None
-        self.thermystate = const.STATUS_INACTIVE
+        self.timerstate = const.STATUS_INACTIVE
         self.unsub = None
 
         hass.bus.async_listen(EVENT_STATE_CHANGED, self.sensorUpdate)
@@ -39,7 +39,7 @@ class ThermyEntity(Entity):
     @property
     def icon(self): return "mdi:timer"
     @property
-    def state(self): return self.thermystate
+    def state(self): return self.timerstate
 
     @property
     def extra_state_attributes(self):
@@ -57,11 +57,14 @@ class ThermyEntity(Entity):
 
     @callback
     def offtimer(self, timeout: int):
-        log.error("offtimer called {}".format(timeout))
+        log.debug("offtimer called for {}: {}".format(self.hvacid, timeout))
+
         @callback
         async def complete(time):
-            if self.thermystate == const.STATUS_ACTIVE:
+            log.debug("complete called for {}".format(self.hvacid))
+            if self.timerstate == const.STATUS_ACTIVE:
                 try:
+                    log.debug("calling climate.turn_off for {}".format(self.hvacid))
                     await self.hass.services.async_call('climate', 'turn_off', { 'entity_id': self.hvacid })
                 except Exception as e:
                     log.exception('error calling climate turn_off', exc_info=e)
@@ -70,7 +73,7 @@ class ThermyEntity(Entity):
         self.clearunsub()
         self.stoptime = datetime.datetime.utcnow() + datetime.timedelta(seconds=timeout)
         self.unsub = async_track_point_in_utc_time(self.hass, complete, self.stoptime)
-        self.thermystate = const.STATUS_ACTIVE
+        self.timerstate = const.STATUS_ACTIVE
         self.async_write_ha_state()
 
 
@@ -78,16 +81,18 @@ class ThermyEntity(Entity):
     def canceltimer(self):
         self.clearunsub()
         self.stoptime = None
-        self.thermystate = const.STATUS_INACTIVE
+        self.timerstate = const.STATUS_INACTIVE
         self.async_write_ha_state()
 
 
     @callback
     async def sensorUpdate(self, event: Event):
         state = event.data.get("new_state")
-        if state is None or  state.entity_id != self.tempid or not state.state.startswith('un'): return
+        if state is None or  state.entity_id != self.tempid or state.state.startswith('un'): return
 
         try:
+            log.debug("temp sensor update for {}".format(self.tempid))
+
             # Monkey patch our Entity (or MqttSensorEntity) to force update state when received
             sensorentity:SensorEntity = self.hass.data[SENSOR_DOMAIN].get_entity(self.tempid)
             sensorentity._attr_force_update = True
@@ -105,6 +110,7 @@ class ThermyEntity(Entity):
             sendtemp:float = round(convert(float(state.state), state.attributes[ATTR_UNIT_OF_MEASUREMENT], hvacentity.temperature_unit), 1)
 
             # send remote temp update to air handler
+            log.debug("calling mqtt.publish({}, {})".format(topic, sendtemp))
             await self.hass.services.async_call(MQTT_DOMAIN, SERVICE_PUBLISH, { ATTR_TOPIC: topic, ATTR_PAYLOAD: sendtemp })
 
         except Exception as e:
