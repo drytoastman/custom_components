@@ -1,6 +1,6 @@
 import datetime
 import logging
-from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT, EVENT_STATE_CHANGED
+from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT, CONF_FORCE_UPDATE, EVENT_STATE_CHANGED
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_point_in_utc_time
@@ -10,6 +10,7 @@ from homeassistant.components.climate import DOMAIN as CLIMATE_DOMAIN
 from homeassistant.components.mqtt import SERVICE_PUBLISH, DOMAIN as MQTT_DOMAIN
 from homeassistant.components.mqtt.const import ATTR_PAYLOAD, ATTR_TOPIC
 from homeassistant.components.mqtt.climate import CONF_TEMP_COMMAND_TOPIC, MqttClimate
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN, SensorEntity
 
 from . import const
 
@@ -84,24 +85,27 @@ class ThermyEntity(Entity):
     @callback
     async def sensorUpdate(self, event: Event):
         state = event.data.get("new_state")
-        if state is None or state.entity_id != self.tempid or state.state == 'unknown': return
+        if state is None or  state.entity_id != self.tempid or not state.state.startswith('un'): return
 
-        # get hvac info
-        hvacentity:MqttClimate = self.hass.data[CLIMATE_DOMAIN].get_entity(self.hvacid)
-        if not hvacentity:
-            log.error("No entity found for {}".format(self.hvacid))
-            return
+        try:
+            # Monkey patch our Entity (or MqttSensorEntity) to force update state when received
+            sensorentity:SensorEntity = self.hass.data[SENSOR_DOMAIN].get_entity(self.tempid)
+            sensorentity._attr_force_update = True
+            if hasattr(sensorentity, '_config'): sensorentity._config[CONF_FORCE_UPDATE] = True
 
-        if '/temp/' not in hvacentity._config[CONF_TEMP_COMMAND_TOPIC]:
-            log.error('{} mqtt commands don\'t appear to have the expected temp command')
-            return
+            hvacentity:MqttClimate = self.hass.data[CLIMATE_DOMAIN].get_entity(self.hvacid)
+            if '/temp/' not in hvacentity._config[CONF_TEMP_COMMAND_TOPIC]:
+                log.error('{} mqtt commands don\'t appear to have the expected temp command')
+                return
 
-        # generate our remote temperature topic (not in the normal climate schema but close)
-        topic:str = hvacentity._config[CONF_TEMP_COMMAND_TOPIC].replace('/temp/', '/remote_temp/')
+            # generate our remote temperature topic (not in the normal climate schema but close)
+            topic:str = hvacentity._config[CONF_TEMP_COMMAND_TOPIC].replace('/temp/', '/remote_temp/')
 
-        # sensor conversion
-        sendtemp:float = convert(float(state.state), state.attributes[ATTR_UNIT_OF_MEASUREMENT], hvacentity.temperature_unit)
+            # sensor conversion
+            sendtemp:float = round(convert(float(state.state), state.attributes[ATTR_UNIT_OF_MEASUREMENT], hvacentity.temperature_unit), 1)
 
-        # send remote temp update to air handler
-        log.error("send publish call here")
-        #self.hass.services.async_call(MQTT_DOMAIN, SERVICE_PUBLISH, { ATTR_TOPIC: topic, ATTR_PAYLOAD: sendtemp })
+            # send remote temp update to air handler
+            await self.hass.services.async_call(MQTT_DOMAIN, SERVICE_PUBLISH, { ATTR_TOPIC: topic, ATTR_PAYLOAD: sendtemp })
+
+        except Exception as e:
+            log.warning("Error processing sensor entity update: ", exc_info=e)
