@@ -61,7 +61,7 @@ export class TempControl extends LitElement {
             .tempcontrol {
                 display: flex;
                 align-items: center;
-                font-size: 250%;
+                font-size: 200%;
             }
         `
     }

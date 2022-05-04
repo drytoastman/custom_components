@@ -8,9 +8,9 @@ import type { ClimateState, SensorState, ThermyCardConfig, ThermyState } from '.
 import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { customElement, property, state } from 'lit/decorators';
 
-function sround(value: string, decimal: number) {
+function sround(value: string, decimal: number): string {
     const scale = decimal*10
-    return Math.round(parseFloat(value)*scale)/scale
+    return (Math.round(parseFloat(value)*scale)/scale).toFixed(decimal)
 }
 
 @customElement('thermy-row')
@@ -58,27 +58,30 @@ export class ThermyRow extends LitElement {
 
         const thermy = this.hass.states[this.config.entity] as unknown as ThermyState
         const hvac   = this.hass.states[thermy.attributes.hvacid] as unknown as ClimateState
-        const temp   = this.hass.states[thermy.attributes.tempid] as unknown as SensorState
-        const humid  = this.hass.states[thermy.attributes.humidid] as unknown as SensorState
+        let temp   = this.hass.states[thermy.attributes.tempid] as unknown as SensorState
+        let humid  = this.hass.states[thermy.attributes.humidid] as unknown as SensorState
+
+        if (temp  === undefined)  temp = {} as any
+        if (humid === undefined) humid = {} as any
 
         return html`
         <div class='outercontainer'>
-            <mode-control  .hass=${this.hass} .hvac=${hvac}></mode-control>
-            <span class='aligner'></span>
-            <span class='name' @click=${() => this.more(hvac.entity_id)}>
-                ${hvac.attributes.friendly_name}
+            <span class='modebox'>
+                <mode-control  .hass=${this.hass} .hvac=${hvac}></mode-control>
+                <span class='aligner'></span>
+                <span class='name' @click=${() => this.more(hvac.entity_id)}>${hvac.attributes.friendly_name}</span>
             </span>
-            <span class='filler'></span>
+            <span class='filler1'></span>
             <timer-control .hass=${this.hass} .thermyState=${thermy}></timer-control>
-            <span class='filler'></span>
+            <span class='filler2'></span>
             <temp-control  .hass=${this.hass} .hvac=${hvac}></temp-control>
-            <span class='filler'></span>
+            <span class='filler3'></span>
             <div class='statusbox'>
                 ${hvac.attributes.remote_temp?
                     html `
-                        <span @click=${()=>this.more(temp.entity_id)}>${sround(temp.state, 1)} ${this.hass.config.unit_system.temperature}</span>
-                        <span @click=${()=>this.more(humid.entity_id)}>${sround(humid.state, 1)} %</span>
-                        ` :
+                       <span @click=${()=>this.more(temp.entity_id)}>${sround(temp.state, 1)} ${this.hass.config.unit_system.temperature}</span>
+                       <span @click=${()=>this.more(humid.entity_id)}>${sround(humid.state, 1)}  &nbsp;%</span>
+                         ` :
                     html `
                         <span>unit: ${hvac.attributes.current_temperature} ${this.hass.config.unit_system.temperature}</span>`
                 }
@@ -105,12 +108,21 @@ export class ThermyRow extends LitElement {
                 align-items: center;
             }
 
+            .modebox {
+                display: flex;
+                align-items: center;
+            }
+
             .aligner {
                 display: block;
                 width: 16px;
             }
-            .filler {
+            .filler1 {
                 flex-grow: 1;
+            }
+            .filler2, .filler3 {
+                display: block;
+                width: 12px;
             }
 
             .statusbox {

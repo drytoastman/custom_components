@@ -51,9 +51,16 @@ export class ModeControl extends LitElement {
         this.hass.callService('climate', 'set_hvac_mode', { entity_id: this.hvac.entity_id, hvac_mode })
     }
 
+    protected menustyle(): string {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((this.hass.themes as any).darkMode)
+            return "--mdc-theme-surface: #555; --mdc-theme-text-primary-on-background: white;"
+        return "";
+    }
+
     protected render(): TemplateResult | void {
         return html`
-            <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
+            <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
                 <ha-icon-button label="select mode" .path=${this.getStateIcon()} slot="trigger" .style="color: ${this.getStateColor()}"></ha-icon-button>
                 ${this.hvac.attributes.hvac_modes.filter(item => !['heat_cool', 'dry'].includes(item)).map((item) =>
                     html`<mwc-list-item @click=${() => this.setmode(item)}>${item}</mwc-list-item>`

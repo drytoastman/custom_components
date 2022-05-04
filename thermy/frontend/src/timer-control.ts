@@ -42,6 +42,13 @@ export class TimerControl extends LitElement {
         this.timerLeft = Math.floor((endtime - now)/1000)
     }
 
+    protected menustyle(): string {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((this.hass.themes as any).darkMode)
+            return "--mdc-theme-surface: #555; --mdc-theme-text-primary-on-background: white;"
+        return "";
+    }
+
     protected render(): TemplateResult | void {
         if (this.timerLeft) {
             const min = ('00'+Math.floor(this.timerLeft/60)).slice(-2)
@@ -54,7 +61,7 @@ export class TimerControl extends LitElement {
             `;
         } else {
             return html`
-                <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
+                <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
                     <ha-icon-button label="start off timer" .path=${mdiCameraTimer} slot="trigger" class='timerbutton'></ha-icon-button>
                     ${[5,15,30,60,120].map((item) =>
                         html`<mwc-list-item @click=${() => this.starttimer(item)}>${item}</mwc-list-item>`
@@ -83,6 +90,7 @@ export class TimerControl extends LitElement {
                 flex-direction: column;
                 align-self: flex-start;
                 align-items: center;
-            }`;
+            }
+        `;
     }
 }
