@@ -22,8 +22,8 @@ class ThermyEntity(Entity):
     def __init__(self, hass: HomeAssistant, id: str, conf) -> None:
         self.entity_id = "{}.{}".format(const.DOMAIN, id)
         self.hvacid    = conf['hvacid']
-        self.tempid    = conf['sensorid'] + "_temperature"
-        self.humidid   = conf['sensorid'] + "_humidity"
+        self.tempid    = conf['tempid']
+        self.humidid   = conf['humidid']
 
         self.stoptime  = None
         self.timerstate = const.STATUS_INACTIVE
