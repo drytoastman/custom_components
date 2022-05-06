@@ -99,8 +99,11 @@ class ThermyEntity(Entity):
             if hasattr(sensorentity, '_config'): sensorentity._config[CONF_FORCE_UPDATE] = True
 
             hvacentity:MqttClimate = self.hass.data[CLIMATE_DOMAIN].get_entity(self.hvacid)
-            if '/temp/' not in hvacentity._config[CONF_TEMP_COMMAND_TOPIC]:
-                log.error('{} mqtt commands don\'t appear to have the expected temp command')
+            if not hvacentity:
+                log.info('{}->{}: hvacentity not found yet'.format(self.tempid, self.hvacid))
+                return
+            if '/temp/' not in hvacentity._config.get(CONF_TEMP_COMMAND_TOPIC, 'missing'):
+                log.info('{}->{}: mqtt commands don\'t appear to have the expected temp command'.format(self.tempid, self.hvacid))
                 return
 
             # generate our remote temperature topic (not in the normal climate schema but close)
