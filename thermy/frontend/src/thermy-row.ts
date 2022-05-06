@@ -58,11 +58,12 @@ export class ThermyRow extends LitElement {
 
         const thermy = this.hass.states[this.config.entity] as unknown as ThermyState
         const hvac   = this.hass.states[thermy.attributes.hvacid] as unknown as ClimateState
-        let temp   = this.hass.states[thermy.attributes.tempid] as unknown as SensorState
-        let humid  = this.hass.states[thermy.attributes.humidid] as unknown as SensorState
+        const temp   = this.hass.states[thermy.attributes.tempid] as unknown as SensorState
+        const humid  = this.hass.states[thermy.attributes.humidid] as unknown as SensorState
 
-        if (temp  === undefined)  temp = {} as any
-        if (humid === undefined) humid = {} as any
+        if (!thermy || !hvac || !temp || !humid) {
+            return this._showError(`Bad values thermy=${thermy}, hvac=${hvac}, temp=${temp}, humid=${humid}`) 
+        }
 
         return html`
         <div class='outercontainer'>
