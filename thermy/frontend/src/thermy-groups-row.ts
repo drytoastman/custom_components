@@ -91,7 +91,7 @@ export class ThermyGroupsRow extends HassBase {
                 fan_modes: hvacs[0].attributes.fan_modes,
                 swing_modes: hvacs[0].attributes.swing_modes,
                 compressor_frequency: hvacs[0].attributes.compressor_frequency,
-                temperature: average(hvacs.map(h => h.attributes.temperature))
+                temperature: Math.round(average(hvacs.map(h => h.attributes.temperature)))
             },
         } as never as ClimateState
 
