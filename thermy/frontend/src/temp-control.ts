@@ -1,21 +1,22 @@
-import { CSSResultGroup, LitElement, PropertyValueMap, TemplateResult, css, html } from "lit";
+import { CSSResultGroup, PropertyValueMap, TemplateResult, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { mdiMinusCircle, mdiPlusCircle } from '@mdi/js'
 
 import { ClimateState } from "./types";
-import { HomeAssistant } from "custom-card-helpers";
+import { HassBase } from "./util";
 
 @customElement('temp-control')
-export class TempControl extends LitElement {
-    @property({ attribute: false }) public hass!: HomeAssistant
+export class TempControl extends HassBase {
     @property({ attribute: false }) public hvac!: ClimateState
-    @state() private workingTemp: number | null = null
-    @state() private isSetting = false
+    @state() protected workingTemp: number | null = null
+    @state() protected isSetting = false
     private timeout!: NodeJS.Timeout
 
-    protected settemp() {
-        this.hass.callService('climate', 'set_temperature', { entity_id: this.hvac.entity_id, temperature: this.workingTemp })
-        this.isSetting = false
+    protected settemp(temp: number | null) {
+        if (temp != null) {
+            this.hass.callService('climate', 'set_temperature', { entity_id: this.hvac.entity_id, temperature: temp })
+            this.isSetting = false
+        }
     }
 
     protected willUpdate(changedProperties: PropertyValueMap<never> | Map<PropertyKey, unknown>): void {
@@ -32,7 +33,7 @@ export class TempControl extends LitElement {
         this.workingTemp += amount
         this.isSetting = true
         if (this.timeout) clearTimeout(this.timeout)
-        this.timeout = setTimeout(this.settemp.bind(this), 2000)
+        this.timeout = setTimeout(() => this.settemp(this.workingTemp), 2000)
     }
 
     protected tempColor(): string {
@@ -56,12 +57,12 @@ export class TempControl extends LitElement {
     static get styles(): CSSResultGroup {
         return css`
             ha-icon-button {
-                --mdc-icon-button-size: 40px;
+                --mdc-icon-button-size: 36px;
             }
             .tempcontrol {
                 display: flex;
                 align-items: center;
-                font-size: 200%;
+                font-size: 24px;
             }
         `
     }

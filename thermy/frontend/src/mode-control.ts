@@ -1,13 +1,12 @@
-import { CSSResultGroup, LitElement, TemplateResult, css, html } from "lit";
+import { CSSResultGroup, TemplateResult, css, html } from "lit";
 import { customElement, property } from "lit/decorators";
 import { mdiAirConditioner, mdiCircleOffOutline, mdiFan, mdiFire, mdiSnowflake, mdiWeatherRainy } from '@mdi/js'
 
 import { ClimateState } from "./types";
-import { HomeAssistant } from "custom-card-helpers";
+import { HassBase } from "./util";
 
 @customElement('mode-control')
-export class ModeControl extends LitElement {
-    @property({ attribute: false }) public hass!: HomeAssistant;
+export class ModeControl extends HassBase {
     @property({ attribute: false }) public hvac!: ClimateState;
 
     protected getStateIcon(): string {
@@ -49,13 +48,6 @@ export class ModeControl extends LitElement {
 
     protected setmode(hvac_mode: string) {
         this.hass.callService('climate', 'set_hvac_mode', { entity_id: this.hvac.entity_id, hvac_mode })
-    }
-
-    protected menustyle(): string {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((this.hass.themes as any).darkMode)
-            return "--mdc-theme-surface: #555; --mdc-theme-text-primary-on-background: white;"
-        return "";
     }
 
     protected render(): TemplateResult | void {

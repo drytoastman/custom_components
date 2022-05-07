@@ -36,5 +36,9 @@ export default [
       format: 'es',
     },
     plugins: [...plugins],
+    onwarn ( warning, warn ) {
+      if (warning.code == 'THIS_IS_UNDEFINED') return;
+      warn(warning)
+    }
   },
 ];

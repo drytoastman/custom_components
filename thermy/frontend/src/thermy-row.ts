@@ -1,21 +1,16 @@
 import './timer-control'
 import './mode-control'
 import './temp-control'
+import './thermy-groups-row'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CSSResultGroup, LitElement, PropertyValues, TemplateResult, css, html } from 'lit';
+import { CSSResultGroup, PropertyValues, TemplateResult, html } from 'lit';
 import type { ClimateState, SensorState, ThermyCardConfig, ThermyState } from './types';
-import { HomeAssistant, fireEvent } from 'custom-card-helpers';
-import { customElement, property, state } from 'lit/decorators';
-
-function sround(value: string, decimal: number): string {
-    const scale = decimal*10
-    return (Math.round(parseFloat(value)*scale)/scale).toFixed(decimal)
-}
+import { HassBase, rowstyle, sround } from './util';
+import { customElement, state } from 'lit/decorators';
 
 @customElement('thermy-row')
-export class ThermyRow extends LitElement {
-    @property({ attribute: false }) public hass!: HomeAssistant;
+export class ThermyRow extends HassBase {
     @state() private config!: ThermyCardConfig;
 
     public setConfig(config: ThermyCardConfig): void {
@@ -24,29 +19,13 @@ export class ThermyRow extends LitElement {
     }
 
     protected shouldUpdate(changedProps: PropertyValues): boolean {
-        if (changedProps.has("config")) { return true; }
-
-        const oldHass = changedProps.get("hass") as HomeAssistant;
-        if (!oldHass) return false;
-        if (oldHass.connected !== this.hass.connected ||
-            oldHass.themes !== this.hass.themes ||
-            oldHass.locale !== this.hass.locale ||
-            oldHass.localize !== this.hass.localize ||
-            oldHass.config.state !== this.hass.config.state) {
-            return true;
-        }
-
         if (this.config.entity != null) {
             const attr = (this.hass.states[this.config.entity] as unknown as ThermyState).attributes
-            return [this.config.entity, attr.hvacid, attr.tempid, attr.humidid].some((entityid) => oldHass.states[entityid] !== this.hass.states[entityid]);
+            return this.shouldIUpdate(changedProps, [this.config.entity, attr.hvacid, attr.tempid, attr.humidid])
         }
-
         return false
     }
 
-    protected more(entityId: string) {
-        fireEvent(this, "hass-more-info", { entityId })
-    }
 
     protected render(): TemplateResult | void {
         if (this.config.show_error) {
@@ -62,7 +41,7 @@ export class ThermyRow extends LitElement {
         const humid  = this.hass.states[thermy.attributes.humidid] as unknown as SensorState
 
         if (!thermy || !hvac || !temp || !humid) {
-            return this._showError(`Bad values thermy=${thermy}, hvac=${hvac}, temp=${temp}, humid=${humid}`) 
+            return this._showError(`Bad values thermy=${thermy}, hvac=${hvac}, temp=${temp}, humid=${humid}`)
         }
 
         return html`
@@ -91,46 +70,5 @@ export class ThermyRow extends LitElement {
         `;
     }
 
-    private _showError(error: string): TemplateResult {
-        const errorCard = document.createElement('hui-error-card');
-        errorCard.setConfig({
-            type: 'error',
-            error,
-            origConfig: this.config,
-        });
-        return html` ${errorCard} `;
-    }
-
-    static get styles(): CSSResultGroup {
-        return css`
-            .outercontainer {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .modebox {
-                display: flex;
-                align-items: center;
-            }
-
-            .aligner {
-                display: block;
-                width: 16px;
-            }
-            .filler1 {
-                flex-grow: 1;
-            }
-            .filler2, .filler3 {
-                display: block;
-                width: 12px;
-            }
-
-            .statusbox {
-                display: flex;
-                flex-direction: column;
-                align-items: end;
-            }
-        `;
-    }
+    static get styles(): CSSResultGroup { return rowstyle }
 }

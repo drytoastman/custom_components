@@ -1,13 +1,12 @@
-import { LitElement, TemplateResult, html, css, CSSResultGroup } from "lit";
+import { TemplateResult, html, css, CSSResultGroup } from "lit";
 import { customElement, property, state } from "lit/decorators";
 
-import { HomeAssistant } from "custom-card-helpers";
 import { ThermyState } from "./types";
 import { mdiCameraTimer, mdiCloseCircle } from '@mdi/js'
+import { HassBase } from "./util";
 
 @customElement('timer-control')
-export class TimerControl extends LitElement {
-    @property({ attribute: false }) public hass!: HomeAssistant;
+export class TimerControl extends HassBase {
     @property({ attribute: false }) public thermyState!: ThermyState;
     @state() private timerLeft!: number | null;
     @state() private interval!: NodeJS.Timer;
@@ -42,16 +41,9 @@ export class TimerControl extends LitElement {
         this.timerLeft = Math.floor((endtime - now)/1000)
     }
 
-    protected menustyle(): string {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((this.hass.themes as any).darkMode)
-            return "--mdc-theme-surface: #555; --mdc-theme-text-primary-on-background: white;"
-        return "";
-    }
-
     protected render(): TemplateResult | void {
         if (this.timerLeft) {
-            const min = ('00'+Math.floor(this.timerLeft/60)).slice(-2)
+            const min = (Math.floor(this.timerLeft/60))
             const sec = ('00'+this.timerLeft%60).slice(-2)
             return html`
                 <div class='timercontrol'>
@@ -89,7 +81,7 @@ export class TimerControl extends LitElement {
                 display: flex;
                 flex-direction: column;
                 align-self: flex-start;
-                align-items: center;
+                align-items: end;
             }
         `;
     }
