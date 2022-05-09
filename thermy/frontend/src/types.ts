@@ -16,6 +16,7 @@ export interface ThermyCardConfig extends LovelaceCardConfig {
     show_error?: boolean;
     test_gui?: boolean;
     entity: string;
+    moreinfo: string;
     tap_action?: ActionConfig;
     hold_action?: ActionConfig;
     double_tap_action?: ActionConfig;
