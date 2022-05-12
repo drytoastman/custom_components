@@ -34,7 +34,7 @@ export class LocksTable extends LitElement {
                     </div>
                     ${Object.keys(this.data.slots[lockid]).map(slotid => html`
                         <div class='slot'>${slotid}</div>
-                        <div class='aname'>${this.data.slots[lockid][slotid]+ 'x'.repeat(parseInt(slotid)*2)}</div>
+                        <div class='aname'>${this.data.slots[lockid][slotid]}</div>
                         <div class='button'>
                             <mwc-button raised dense>
                                 <ha-icon icon="hass:trash-can-outline" @click=${() => removeNameFromLock(this.hass, this.data.slots[lockid][slotid], lockid)}></ha-icon>
