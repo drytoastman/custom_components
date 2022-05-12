@@ -1,6 +1,7 @@
 import { CSSResultGroup, LitElement, css, html } from 'lit';
 import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { customElement, property } from 'lit/decorators.js';
+import { mdiLockPlus, mdiPencil, mdiTrashCanOutline } from '@mdi/js';
 
 export interface LocksyData {
     codes: { [name: string]: string }
@@ -133,28 +134,30 @@ export class MyLocksPanel extends LitElement {
                         <div class='value'>${this.data.codes[name].replace(/./g, '*')}</div>
                         <div style="position: relative;">
                             ${this.locksWithoutCode(name).length > 0 ? html`
-                                <mwc-button class='menubutton' raised dense label="Assign To ..." @click="${() => this.menu(name)}"></mwc-button>
+                                <mwc-button label='' raised dense @click="${() => this.menu(name)}">
+                                    <ha-svg-icon path=${mdiLockPlus}></ha-svg-icon>
+                                </mwc-button>
+                                <mwc-menu activatable id="menu${name}" @selected=${(e) => this.addNameToLock(name, e.target.selected.value)}>
+                                    ${this.locksWithoutCode(name).map(lockid => html`
+                                        <mwc-list-item value=${lockid}>${this.getLockName(lockid)}</mwc-list-item>
+                                    `)}
+                                </mwc-menu>
                             `: html``}
-                            <mwc-menu activatable id="menu${name}" @selected=${(e) => this.addNameToLock(name, e.originalTarget.items[e.detail.index].value)}>
-                                ${this.locksWithoutCode(name).map(lockid => html`
-                                    <mwc-list-item value=${lockid}>${this.getLockName(lockid)}</mwc-list-item>
-                                `)}
-                            </mwc-menu>
 
-                            <mwc-button raised dense>
-                                <ha-icon icon="hass:pencil" @click=${(e) => this.changeCode(e, name, this.data.codes[name])}></ha-icon>
+                            <mwc-button raised dense @click=${(e) => this.changeCode(e, name, this.data.codes[name])}>
+                                <ha-svg-icon path=${mdiPencil}></ha-svg-icon>
                             </mwc-button>
 
                             ${this.unusedCode(name) ? html`
-                                <mwc-button raised dense>
-                                    <ha-icon icon="hass:trash-can-outline" @click=${() => this.deleteCode(name)}></ha-icon>
+                                <mwc-button raised dense @click=${() => this.deleteCode(name)}>
+                                    <ha-svg-icon path=${mdiTrashCanOutline}></ha-svg-icon>
                                 </mwc-button>
-                            `: html``}                                 
+                            `: html``}
                         </div>
                     `)}
                 </div>
                 <div class='addwrapper'>
-                    <mwc-button class='addbutton' raised dense label="Add Code" @click=${this.addCode}></mwc-button>               
+                    <mwc-button class='addbutton' raised dense label="Add Code" @click=${this.addCode}></mwc-button>
                 </div>
 
             </ha-card>
@@ -186,7 +189,7 @@ export class MyLocksPanel extends LitElement {
     }
 
     static get styles(): CSSResultGroup {
-        return css` 
+        return css`
         app-header,
         app-toolbar {
             background-color: var(--app-header-background-color);
@@ -203,14 +206,14 @@ export class MyLocksPanel extends LitElement {
         }
 
         ha-card {
-            margin: 1rem;   
+            margin: 1rem;
         }
-        
+
         app-toolbar [main-title] {
             margin-left: 20px;
         }
 
-        .codetable { 
+        .codetable {
             display: inline-grid;
             grid-template-columns: auto auto auto;
             grid-gap: 1rem;
@@ -252,7 +255,7 @@ export class MyLocksPanel extends LitElement {
         .addbutton {
             width: 100%;
         }
-        
+
         :host {
             color: var(--primary-text-color);
             --paper-card-header-color: var(--primary-text-color);
