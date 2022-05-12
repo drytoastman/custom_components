@@ -2,7 +2,7 @@ import { CSSResultGroup, LitElement, css, html } from 'lit';
 import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 import { addNameToLock, deleteCode } from './actions';
 import { customElement, property } from 'lit/decorators.js';
-import { mdiLockPlus, mdiPencil, mdiTrashCanOutline } from '@mdi/js';
+import { mdiLockPlus, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@mdi/js';
 
 import { LocksyData } from './types';
 
@@ -88,9 +88,10 @@ export class CodeTable extends LitElement {
                         </mwc-button>
                     `: html``}
                 </div>`)}
-            </div>
-            <div class='addwrapper'>
-                <mwc-button class='addbutton' raised dense label="Add Code" @click=${this.addCodeEvent}></mwc-button>
+
+                <mwc-button class='addbutton' raised dense @click=${this.addCodeEvent}>
+                    <ha-svg-icon path=${mdiPlus}></ha-svg-icon>
+                </mwc-button>
             </div>
         `;
     }
@@ -104,6 +105,10 @@ export class CodeTable extends LitElement {
                 align-items: center;
                 padding: 1rem;
                 padding-top: 0;
+            }
+
+            .addbutton {
+                grid-column: 1 / span 2;
             }
         `;
     }
