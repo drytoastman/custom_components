@@ -29,7 +29,7 @@ export class CodeTable extends LitElement {
         (el as any).show()
     }
 
-    private addCode(ev: Event) {
+    private addCodeEvent(ev: Event) {
         const element = ev.target as HTMLElement;
         fireEvent(element, 'show-dialog', {
           dialogTag: 'name-code-dialog',
@@ -44,7 +44,7 @@ export class CodeTable extends LitElement {
         });
     }
 
-    private changeCode(ev: Event, name: string, code: string) {
+    private changeCodeEvent(ev: Event, name: string, code: string) {
         const element = ev.target as HTMLElement;
         fireEvent(element, 'show-dialog', {
           dialogTag: 'name-code-dialog',
@@ -78,7 +78,7 @@ export class CodeTable extends LitElement {
                         </mwc-menu>
                     `: html``}
 
-                    <mwc-button raised dense @click=${(e) => this.changeCode(e, name, this.data.codes[name])}>
+                    <mwc-button raised dense @click=${(e) => this.changeCodeEvent(e, name, this.data.codes[name])}>
                         <ha-svg-icon path=${mdiPencil}></ha-svg-icon>
                     </mwc-button>
 
@@ -90,7 +90,7 @@ export class CodeTable extends LitElement {
                 </div>`)}
             </div>
             <div class='addwrapper'>
-                <mwc-button class='addbutton' raised dense label="Add Code" @click=${this.addCode}></mwc-button>
+                <mwc-button class='addbutton' raised dense label="Add Code" @click=${this.addCodeEvent}></mwc-button>
             </div>
         `;
     }

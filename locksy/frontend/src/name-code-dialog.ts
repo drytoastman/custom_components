@@ -1,4 +1,5 @@
 import { CSSResultGroup, LitElement, css, html } from 'lit';
+import { addCode, changeCode } from './actions';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { HomeAssistant } from 'custom-card-helpers';
@@ -29,10 +30,10 @@ export class NameCodeDialog extends LitElement {
             </ha-header-bar>
             </div>
             <div class="wrapper">
-                <ha-textfield id='namefield' label="Name" @input=${(ev: Event) => (this._params.name = (ev.target as HTMLInputElement).value)} value="${this._params.name}" 
+                <ha-textfield id='namefield' label="Name" @input=${(ev: Event) => (this._params.name = (ev.target as HTMLInputElement).value)} value="${this._params.name}"
                     minLength=3 maxLength=20 validationMessage="name must be between 3 and 30 characters"
                     ?readOnly="${this._params.change}"></ha-textfield>
-                <ha-textfield id='codefield' label="Code" @input=${(ev: Event) => (this._params.code = (ev.target as HTMLInputElement).value)} value="${this._params.code}" 
+                <ha-textfield id='codefield' label="Code" @input=${(ev: Event) => (this._params.code = (ev.target as HTMLInputElement).value)} value="${this._params.code}"
                     minlength=4 maxlength=4 validationMessage="code must be 4 digits"
                 ></ha-textfield>
             </div>
@@ -49,9 +50,7 @@ export class NameCodeDialog extends LitElement {
         if (!(this.shadowRoot?.getElementById('namefield') as any).checkValidity() ||
             !(this.shadowRoot?.getElementById('codefield') as any).checkValidity()) return;
 
-        this.hass.callService('locksy', this._params.change ? 'change_code' : 'add_code', { name: name, code: code })
-        .catch(e => alert(`Error ${this._params.change ? 'changing' : 'adding'} code: ${JSON.stringify(e)}`))
-        .then(() => { this.closeDialog(); });
+        ((this._params.change) ? changeCode(this.hass, name, code) : addCode(this.hass, name, code)).then(() => this.closeDialog())
     }
 
     static get styles(): CSSResultGroup {
