@@ -65,7 +65,6 @@ export class CodeTable extends LitElement {
             <div class="codetable">
             ${Object.keys(this.data.codes).map(name => html`
                 <div class='name'>${name}</div>
-                <div class='value'>${this.data.codes[name].replace(/./g, '*')}</div>
                 <div style="position: relative;">
                     ${this.locksWithoutCode(name).length > 0 ? html`
                         <mwc-button label='' raised dense @click="${() => this.menu(name)}">
@@ -100,7 +99,7 @@ export class CodeTable extends LitElement {
         return css`
             .codetable {
                 display: inline-grid;
-                grid-template-columns: auto auto auto;
+                grid-template-columns: auto auto;
                 grid-gap: 1rem;
                 align-items: center;
                 padding: 1rem;
@@ -108,7 +107,13 @@ export class CodeTable extends LitElement {
             }
 
             .addbutton {
-                grid-column: 1 / span 2;
+                grid-column: 2;
+            }
+
+            .name {
+                font-size: 16px;
+                width: 4rem;
+                padding-left: 1rem;
             }
         `;
     }

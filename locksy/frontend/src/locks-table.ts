@@ -32,17 +32,15 @@ export class LocksTable extends LitElement {
                             <div class='lname'>${this.getLockName(lockid)}</div>
                         </div>
                     </div>
-                    <div class='slottable'>
                     ${Object.keys(this.data.slots[lockid]).map(slotid => html`
                         <div class='slot'>${slotid}</div>
-                        <div class='aname'>${this.data.slots[lockid][slotid]}</div>
+                        <div class='aname'>${this.data.slots[lockid][slotid]+ 'x'.repeat(parseInt(slotid)*2)}</div>
                         <div class='button'>
                             <mwc-button raised dense>
                                 <ha-icon icon="hass:trash-can-outline" @click=${() => removeNameFromLock(this.hass, this.data.slots[lockid][slotid], lockid)}></ha-icon>
                             </mwc-button>
                         </div>
                     `)}
-                    </div>
                 `)}
             </div>
         `;
@@ -52,19 +50,17 @@ export class LocksTable extends LitElement {
         return css`
         .loctable {
             display: inline-grid;
-            grid-template-columns: auto auto;
-            grid-gap: 1rem;
-            align-items: baseline;
+            grid-template-columns: auto auto auto auto;
+            grid-gap: 0.75rem;
+            align-items: center;
             padding: 1rem;
             padding-top: 0;
         }
 
-        .slottable {
-            display: inline-grid;
-            grid-template-columns: 1rem auto auto;
-            align-items: center;
-            gap: 0.7rem;
-        }
+        .lockid { grid-column: 1; }
+        .slot   { grid-column: 2; }
+        .aname  { grid-column: 3; }
+        .button { grid-column: 4; }
 
         .clickwrap {
             display: inline-flex;
