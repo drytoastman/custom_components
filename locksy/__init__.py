@@ -75,7 +75,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.error("Locksy is already installed?  Overwritting old")
     hass.data[const.DOMAIN] = locksy
 
-    dr = await device_registry.async_get_registry(hass)
+    dr = device_registry.async_get(hass)
     dr.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(const.DOMAIN, 'singleton')},

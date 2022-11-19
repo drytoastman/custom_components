@@ -30,7 +30,7 @@ def tryint(val):
         return val
 
 def intkeys(val):
-    if isinstance(val, collections.Mapping):
+    if isinstance(val, collections.abc.Mapping):
         return { tryint(k): intkeys(v) for k,v in val.items() }
     else:
         return val
