@@ -13,7 +13,6 @@ INTEGRATION_FOLDER = DOMAIN
 PANEL_FOLDER = "frontend"
 PANEL_FILENAME = "dist/scanny-panel.js"
 
-PANEL_URL = "/scanny"
 PANEL_TITLE = NAME
 PANEL_ICON = "mdi:tag"
 PANEL_NAME = "scanny-panel"

@@ -1,6 +1,7 @@
 """The Scanny Integration."""
 import logging
 import os
+import voluptuous as vol
 from homeassistant.components import panel_custom
 
 from homeassistant.core import (Event, callback, HomeAssistant)
@@ -91,6 +92,11 @@ class ScannyEntity(Entity):
         }
 
     @callback
+    def setaddmode(self, on: bool):
+        self.addMode = on
+        self.schedule_update_ha_state()
+
+    @callback
     async def tagScanned(self, event: Event):
         _LOGGER.debug("scanned {}".format(event.data['tag_id']))
         devid = event.data['device_id']
@@ -124,7 +130,7 @@ async def register_frontend(hass: HomeAssistant):
         #websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({vol.Required("type"): "scanny/updates"}))
 
     hass.http.register_static_path(
-        const.PANEL_URL,
+        '/api/scanny/static',
         os.path.join(hass.config.path('custom_components'), 'scanny/frontend/dist/'),
         cache_headers=False
     )
@@ -132,13 +138,14 @@ async def register_frontend(hass: HomeAssistant):
     await panel_custom.async_register_panel(
         hass,
         webcomponent_name=const.PANEL_NAME,
-        frontend_url_path=const.PANEL_URL,
-        module_url=const.PANEL_URL+'/scanny-panel.js',
+        frontend_url_path='scanny',
+        module_url='/api/scanny/static/scanny-panel.js',
         sidebar_title='Scanny',
         sidebar_icon=const.PANEL_ICON,
         require_admin=True,
         config={},
     )
+
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if const.DOMAIN not in config:
@@ -147,8 +154,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     component = hass.data[const.DOMAIN] = EntityComponent(_LOGGER, const.DOMAIN, hass)
     await component.async_setup(config)
 
-    #component.async_register_entity_service("canceltimer", {}, "canceltimer")
-
+    component.async_register_entity_service("setaddmode",  {vol.Required('on'): bool}, "setaddmode")
 
     storage: Store = Store(hass, const.STORAGE_VERSION, const.STORAGE_KEY)
     scanny = ScannyEntity(hass, 'single', storage, config[const.DOMAIN], await storage.async_load() or set([]))
