@@ -1,0 +1,19 @@
+{
+  "domain": "scanny",
+  "name": "Scanny",
+  "documentation": "https://github.com/drytoastman/scanny",
+  "version": "v0.0.1",
+  "requirements": [],
+  "dependencies": [
+    "http",
+    "panel_custom",
+    "websocket_api"
+  ],
+  "after_dependencies": [
+  ],
+  "codeowners": [
+    "@drytoastman"
+  ],
+  "config_flow": true,
+  "iot_class": "local_push"
+}
