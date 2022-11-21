@@ -1,12 +1,7 @@
-// import './code-table'
-// import './scans-table'
-
 import { CSSResultGroup, LitElement, css, html } from 'lit'
 import { HomeAssistant, fireEvent } from 'custom-card-helpers'
 import { customElement, property } from 'lit/decorators.js'
-import { mdiLockPlus, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@mdi/js';
-
-// import { LocksyData } from './types'
+import { mdiPencil, mdiTrashCanOutline } from '@mdi/js';
 
 interface ScannyData {
     addMode: boolean,
@@ -71,8 +66,7 @@ export class MyLocksPanel extends LitElement {
             </app-header>
           </ha-app-layout>
           <div class="view">
-            <ha-card header="Codes">
-                <div>${JSON.stringify(this.data)}</div>
+            <ha-card header="Tags">
                 <ol>
                 ${Object.keys(this.data.allowed).map(uid => html`
                     <li>
@@ -86,7 +80,7 @@ export class MyLocksPanel extends LitElement {
                     </li>
                 `)}
                 </ol>
-                <mwc-button @click=${() => setAddMode(this.hass, !this.data.addMode)}>${this.data.addMode ? 'Cancel Add Mode' : 'Enable Add Mode'}</mwc-button>
+                <mwc-button raised @click=${() => setAddMode(this.hass, !this.data.addMode)}>${this.data.addMode ? 'Cancel Add Mode' : 'Enable Add Mode'}</mwc-button>
             </ha-card>
           </div>
         `;
@@ -125,6 +119,20 @@ export class MyLocksPanel extends LitElement {
 
         ha-card {
             margin: 1rem;
+        }
+
+        ha-card > mwc-button {
+            margin: 0 0 1rem 2rem;
+        }
+
+        ol li {
+            padding-bottom: 1rem;
+        }
+
+        ol mwc-button {
+            vertical-align: middle;
+            margin-left: 1px;
+            margin-right: 4px;
         }
 
         app-toolbar [main-title] {
