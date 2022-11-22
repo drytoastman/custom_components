@@ -76,15 +76,14 @@ class Scanny:
         if dev.name not in self.assigned: return # ignore non assigned scanners
 
         if tagid not in self.allowed:
-            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_rfidreader_tag_ko".format(dev.name), {})
+            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_tag_bad".format(dev.name), {})
         elif dev.name not in self.assigned:
-            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_rfidreader_tag_ko".format(dev.name), {})
+            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_tag_bad".format(dev.name), {})
         else:
             # send ok
             service = self.assigned[dev.name]
-            _LOGGER.debug("service is {}".format(service))
             await self.hass.services.async_call(**service)
-            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_rfidreader_tag_ok".format(dev.name), {})
+            await self.hass.services.async_call(ESPHOME_DOMAIN, "{}_tag_ok".format(dev.name), {})
 
 
 
