@@ -4,7 +4,7 @@ from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT, CONF_FORCE_UPDATE, EVE
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_point_in_utc_time
-from homeassistant.util.temperature import convert
+from homeassistant.util.unit_conversion import TemperatureConverter
 
 from homeassistant.components.climate import DOMAIN as CLIMATE_DOMAIN
 from homeassistant.components.mqtt import SERVICE_PUBLISH, DOMAIN as MQTT_DOMAIN
@@ -110,7 +110,7 @@ class ThermyEntity(Entity):
             topic:str = hvacentity._config[CONF_TEMP_COMMAND_TOPIC].replace('/temp/', '/remote_temp/')
 
             # sensor conversion
-            sendtemp:float = round(convert(float(state.state), state.attributes[ATTR_UNIT_OF_MEASUREMENT], hvacentity.temperature_unit), 1)
+            sendtemp:float = round(TemperatureConverter.convert(float(state.state), state.attributes[ATTR_UNIT_OF_MEASUREMENT], hvacentity.temperature_unit), 1)
 
             # send remote temp update to air handler
             log.debug("calling mqtt.publish({}, {})".format(topic, sendtemp))
