@@ -115,7 +115,7 @@ export class ThermyGroupsRow extends HassBase {
                 <multi-temp-control .hass=${this.hass} .hvac=${groupclimate} .targets=${this.hvacids}></multi-temp-control>
                 <span class='filler3'></span>
                 <div class='statusbox' @click=${() => this.more(this.config.moreinfo)}>
-                    ${groupclimate.attributes.compressor_frequency} Hz
+                    ${groupclimate.attributes.compressor_frequency}%
                 </div>
             </div>
         `;

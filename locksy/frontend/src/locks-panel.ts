@@ -7,7 +7,7 @@ import { customElement, property } from 'lit/decorators.js'
 import { HomeAssistant } from 'custom-card-helpers'
 import { LocksyData } from './types'
 
-const hassneeds = ['ha-app-layout', 'ha-card', 'state-badge']
+const hassneeds = ['ha-card', 'state-badge']
 
 @customElement('locks-panel')
 export class MyLocksPanel extends LitElement {

@@ -62,10 +62,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up Locksy integration from a config entry."""
 
-    if ZWAVEJS_DOMAIN not in hass.data or not len(hass.data[ZWAVEJS_DOMAIN].values()):
+    ce = hass.config_entries.async_loaded_entries(ZWAVEJS_DOMAIN)
+    if len(ce) < 1:
         raise HomeAssistantError("No valid zwave_js setup, cannot install locksy")
 
-    client = list(hass.data[ZWAVEJS_DOMAIN].values())[0][DATA_CLIENT]
+    client = ce[0].runtime_data[DATA_CLIENT]
+    _LOGGER.error("client {}".format(client))
     while not client.driver:
         await asyncio.sleep(1)
         
