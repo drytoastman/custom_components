@@ -4,6 +4,7 @@ import os
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.helpers.entity_component import EntityComponent
 from homeassistant.helpers.typing import ConfigType
 
@@ -23,10 +24,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         ThermyEntity(hass, id, conf) for id,conf in config[const.DOMAIN].items()
     ])
 
-    hass.http.register_static_path(
-        "/thermy",
-        os.path.join(hass.config.path('custom_components'), 'thermy/frontend/dist/'),
-        cache_headers=False
-    )
+    await hass.http.async_register_static_paths([
+        StaticPathConfig("/thermy",  os.path.join(hass.config.path('custom_components'), 'thermy/frontend/dist/'), False)
+    ])
 
     return True

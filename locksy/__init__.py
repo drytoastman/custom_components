@@ -67,7 +67,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         raise HomeAssistantError("No valid zwave_js setup, cannot install locksy")
 
     client = ce[0].runtime_data[DATA_CLIENT]
-    _LOGGER.error("client {}".format(client))
     while not client.driver:
         await asyncio.sleep(1)
         

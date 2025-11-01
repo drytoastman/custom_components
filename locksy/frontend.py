@@ -4,6 +4,7 @@ import logging
 import voluptuous as vol
 from typing import Any
 from homeassistant.components import panel_custom, websocket_api
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.components.websocket_api.connection import ActiveConnection
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -36,11 +37,9 @@ async def register_frontend(hass: HomeAssistant):
     websocket_api.async_register_command(hass, "locksy/updates", websocket_updates,  
         websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend({vol.Required("type"): "locksy/updates"}))
 
-    hass.http.register_static_path(
-        PANEL_URL,
-        os.path.join(hass.config.path('custom_components'), 'locksy/frontend/dist/'),
-        cache_headers=False
-    )
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(PANEL_URL,  os.path.join(hass.config.path('custom_components'), 'locksy/frontend/dist/'), False)
+    ])
 
     await panel_custom.async_register_panel(
         hass,
