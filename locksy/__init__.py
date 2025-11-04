@@ -2,10 +2,10 @@
 import asyncio
 import logging
 import voluptuous as vol
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ConfigEntryNotReady
 
 from zwave_js_server.client import Client as ZWaveClient
-from homeassistant.components.zwave_js.const import DATA_CLIENT, DOMAIN as ZWAVEJS_DOMAIN
+from homeassistant.components.zwave_js.const import DOMAIN as ZWAVEJS_DOMAIN
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import (callback, HomeAssistant)
@@ -64,12 +64,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     ce = hass.config_entries.async_loaded_entries(ZWAVEJS_DOMAIN)
     if len(ce) < 1:
-        raise HomeAssistantError("No valid zwave_js setup, cannot install locksy")
+        raise ConfigEntryNotReady("No valid zwave_js setup, should retry later")
 
-    client = ce[0].runtime_data[DATA_CLIENT]
+    _LOGGER.info("Locksy is starting")
+    client = ce[0].runtime_data.client
     while not client.driver:
         await asyncio.sleep(1)
-        
+
     locksy = Locksy(hass)
     await locksy.setup(client)
     if const.DOMAIN in hass.data:

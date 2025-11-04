@@ -71,6 +71,14 @@ export class LocksTable extends LitElement {
         .clickwrap > * {
             flex-grow: 1;
         }
+
+        mwc-button {
+                padding: 0.5rem;
+        }
+
+        mwc-button:hover {
+            background: #f0f0f0;
+        }
         `;
     }
 }

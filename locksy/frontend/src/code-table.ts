@@ -112,8 +112,15 @@ export class CodeTable extends LitElement {
 
             .name {
                 font-size: 16px;
-                width: 4rem;
                 padding-left: 1rem;
+            }
+
+            mwc-button {
+                padding: 0.5rem;
+            }
+
+            mwc-button:hover {
+                background: #f0f0f0;
             }
         `;
     }
