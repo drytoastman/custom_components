@@ -67,14 +67,14 @@ export class CodeTable extends LitElement {
                 <div class='name'>${name}</div>
                 <div style="position: relative;">
                     ${this.locksWithoutCode(name).length > 0 ? html`
-                        <mwc-button label='' raised dense @click="${() => this.menu(name)}">
-                            <ha-svg-icon path=${mdiLockPlus}></ha-svg-icon>
-                        </mwc-button>
-                        <mwc-menu activatable id="menu${name}" @selected=${(e) => addNameToLock(this.hass, name, e.target.selected.value)}>
+
+
+                    <ha-dropdown class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" absolute>
+                        <ha-icon-button label="add to lock" .path=${mdiLockPlus} slot="trigger" class='lockbutton'></ha-icon-button>
                             ${this.locksWithoutCode(name).map(lockid => html`
-                                <mwc-list-item value=${lockid}>${this.getLockName(lockid)}</mwc-list-item>
+                                <mwc-list-item @click=${() => addNameToLock(this.hass, name, lockid)}>${this.getLockName(lockid)}</mwc-list-item>
                             `)}
-                        </mwc-menu>
+                    </ha-dropdown>
                     `: html``}
 
                     <mwc-button raised dense @click=${(e) => this.changeCodeEvent(e, name, this.data.codes[name])}>

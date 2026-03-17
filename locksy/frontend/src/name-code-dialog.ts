@@ -36,8 +36,8 @@ export class NameCodeDialog extends LitElement {
                 <ha-textfield id='codefield' label="Code" @input=${(ev: Event) => (this._params.code = (ev.target as HTMLInputElement).value)} value="${this._params.code}"
                     minlength=4 maxlength=4 validationMessage="code must be 4 digits"
                 ></ha-textfield>
+            <button slot="primaryAction" @click=${this.saveClick}>Ok</button>
             </div>
-            <mwc-button slot="primaryAction" @click=${this.saveClick}>Ok</mwc-button>
         </ha-dialog>
         `;
     }
@@ -60,6 +60,13 @@ export class NameCodeDialog extends LitElement {
         }
         ha-textfield {
             display: block;
+        }
+        div.wrapper button {
+            float: right;
+            height: 2rem;
+            font-size: 1.2rem;
+            padding-left: 20px;
+            padding-right: 20px;
         }
         `;
     }

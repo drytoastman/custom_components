@@ -40,37 +40,34 @@ export class MyLocksPanel extends LitElement {
         }
 
         return html`
-          <ha-app-layout>
-            <app-header fixed slot="header">
-              <app-toolbar>
-                <ha-menu-button .hass=${this.hass} .narrow=${this.narrow}></ha-menu-button>
-                <div main-title>
-                  Locksy
+            <div class="header">
+                <div class="toolbar">
+                    <ha-menu-button .hass=${this.hass} .narrow=${this.narrow}></ha-menu-button>
+                    <div class="main-title">Locksy</div>
                 </div>
-              </app-toolbar>
-            </app-header>
-          </ha-app-layout>
-          <div class="view">
-            <ha-card header="Codes">
-                <code-table .hass=${this.hass} .data=${this.data}></code-table>
-            </ha-card>
-            <ha-card header="Locks">
-                <locks-table .hass=${this.hass} .data=${this.data}></locks-table>
-            </ha-card>
-          </div>
+            </div>
+            <div class="view">
+                <ha-card header="Codes">
+                    <code-table .hass=${this.hass} .data=${this.data}></code-table>
+                </ha-card>
+                <ha-card header="Locks">
+                    <locks-table .hass=${this.hass} .data=${this.data}></locks-table>
+                </ha-card>
+            </div>
         `;
     }
 
     static get styles(): CSSResultGroup {
         return css`
-        app-header,
-        app-toolbar {
+        .header,.toolbar {
             background-color: var(--app-header-background-color);
             font-weight: 400;
             color: var(--app-header-text-color, white);
         }
-        app-toolbar {
+        .toolbar {
             height: var(--header-height);
+            display: flex;
+            align-items: center;
         }
 
         ha-app-layout {
@@ -82,8 +79,15 @@ export class MyLocksPanel extends LitElement {
             margin: 1rem;
         }
 
-        app-toolbar [main-title] {
+        .main-title-container {
+            display: inline-block;
+            height: 100%;
+        }
+
+        .toolbar .main-title {
             margin-left: 20px;
+            font-size: 1.8rem;
+            display: inline-block;
         }
 
         :host {

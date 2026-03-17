@@ -53,12 +53,12 @@ export class TimerControl extends HassBase {
             `;
         } else {
             return html`
-                <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
+                <ha-dropdown class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
                     <ha-icon-button label="start off timer" .path=${mdiCameraTimer} slot="trigger" class='timerbutton'></ha-icon-button>
                     ${[5,15,30,60,120].map((item) =>
                         html`<mwc-list-item @click=${() => this.starttimer(item)}>${item}</mwc-list-item>`
                     )}
-                </ha-button-menu>
+                </ha-dropdown>
             `;
         }
     }

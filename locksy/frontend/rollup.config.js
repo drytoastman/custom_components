@@ -20,7 +20,7 @@ export default [
     input: 'src/locks-panel.ts',
     output: {
       dir: 'dist',
-      //format: 'iife',
+      format: 'es',
       sourcemap: true
     },
     plugins: [...plugins],

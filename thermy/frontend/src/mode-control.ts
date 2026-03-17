@@ -52,18 +52,18 @@ export class ModeControl extends HassBase {
 
     protected render(): TemplateResult | void {
         return html`
-            <ha-button-menu class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
+            <ha-dropdown class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
                 <ha-icon-button label="select mode" .path=${this.getStateIcon()} slot="trigger" .style="color: ${this.getStateColor()}"></ha-icon-button>
                 ${this.hvac.attributes.hvac_modes.filter(item => !['heat_cool', 'dry'].includes(item)).map((item) =>
                     html`<mwc-list-item @click=${() => this.setmode(item)}>${item}</mwc-list-item>`
                 )}
-            </ha-button-menu>
+            </ha-dropdown>
         `
     }
 
     static get styles(): CSSResultGroup {
         return css`
-            ha-button-menu {
+            ha-dropdown {
                 --mdc-icon-button-size: 40px;
             }
         `
