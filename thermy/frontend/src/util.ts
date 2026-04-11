@@ -71,7 +71,13 @@ export const rowstyle = css`
     .modebox {
         display: flex;
         align-items: center;
+        flex-shrink: 10;
+
+        .name {
+            flex-basis: min-content;
+        }
     }
+
 
     .aligner {
         display: block;

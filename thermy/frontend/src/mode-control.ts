@@ -46,16 +46,19 @@ export class ModeControl extends HassBase {
         return 'red'
     }
 
-    protected setmode(hvac_mode: string) {
+    protected setmode(event) {
+        const hvac_mode = event.detail.item.value;
         this.hass.callService('climate', 'set_hvac_mode', { entity_id: this.hvac.entity_id, hvac_mode })
+        this.requestUpdate();
     }
 
     protected render(): TemplateResult | void {
         return html`
-            <ha-dropdown class="ha-icon-overflow-menu-overflow" corner="BOTTOM_START" style="${this.menustyle()}" absolute>
-                <ha-icon-button label="select mode" .path=${this.getStateIcon()} slot="trigger" .style="color: ${this.getStateColor()}"></ha-icon-button>
+            <ha-dropdown @wa-select=${this.setmode}>
+                <ha-icon-button slot="trigger" label="select mode" .path=${this.getStateIcon()} .style="color: ${this.getStateColor()}">
+                </ha-icon-button>
                 ${this.hvac.attributes.hvac_modes.filter(item => !['heat_cool', 'dry'].includes(item)).map((item) =>
-                    html`<mwc-list-item @click=${() => this.setmode(item)}>${item}</mwc-list-item>`
+                    html`<ha-dropdown-item value="${item}">${item}</ha-dropdown-item>`
                 )}
             </ha-dropdown>
         `
