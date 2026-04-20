@@ -74,7 +74,7 @@ export const rowstyle = css`
         flex-shrink: 10;
 
         .name {
-            flex-basis: min-content;
+            min-width: 4rem;
         }
     }
 
@@ -98,6 +98,7 @@ export const rowstyle = css`
         flex-direction: column;
         align-items: end;
         font-size: 16px;
-        width: 3.8rem;
+        min-width: 3.5rem;
+        text-wrap: nowrap;
     }
 `;

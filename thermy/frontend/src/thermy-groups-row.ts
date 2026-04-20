@@ -13,10 +13,11 @@ import { mdiArrowDownDropCircleOutline } from '@mdi/js';
 @customElement('multi-mode-control')
 export class MultiModeControl extends ModeControl {
     @property({ attribute: false }) public targets!: string[]
-    protected setmode(hvac_mode: string) {
-        this.targets.forEach(target =>
-            this.hass.callService('climate', 'set_hvac_mode', { entity_id: target, hvac_mode })
-        )
+    protected setmode(event: any) {
+        const hvac_mode = event.detail.item.value;
+        this.targets.forEach(target => {
+            this.hass.callService('climate', 'set_hvac_mode', { entity_id: target, hvac_mode });
+        })
     }
     protected getStateIcon(): string {
         return mdiArrowDownDropCircleOutline
